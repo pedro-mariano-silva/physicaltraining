@@ -12,5 +12,5 @@ O 'expo' serve como base para construir aplicativos móveis de forma rápida e e
 
 
 # Print da tela de login:
-<img src="https://github.com/pedro-mariano-silva/physicaltraining/blob/tela-de-login/tela-login.jpeg" width="400" height="300" />
+<img src="https://github.com/pedro-mariano-silva/physicaltraining/blob/tela-de-login/tela-login.jpeg" width="395" height="750" />
 
