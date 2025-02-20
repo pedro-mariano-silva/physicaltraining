@@ -12,3 +12,4 @@ O 'expo' serve como base para construir aplicativos móveis de forma rápida e e
 
 
 # Imagens do projeto:
+![Tela de login](https://github.com/pedro-mariano-silva/physicaltraining/blob/tela-de-login/tela-login.jpeg)
