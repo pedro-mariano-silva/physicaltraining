@@ -11,5 +11,6 @@ O 'expo' serve como base para construir aplicativos móveis de forma rápida e e
 - **Expo**: Framework e plataforma para aplicativos universais em React.
 
 
-# Imagens do projeto:
-![Tela de login](https://github.com/pedro-mariano-silva/physicaltraining/blob/tela-de-login/tela-login.jpeg)
+# Print da tela de login:
+<img src="https://github.com/pedro-mariano-silva/physicaltraining/blob/tela-de-login/tela-login.jpeg" width="400" height="300" />
+
