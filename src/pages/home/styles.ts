@@ -37,8 +37,9 @@ export const style = StyleSheet.create({
     textButtonSair:{
         color: 'white',
         alignItems: 'center',
-        fontSize: 18,
+        fontSize: 20,
         textAlign: 'center',
+        fontWeight: 'bold',
         
         
     },
@@ -51,7 +52,7 @@ export const style = StyleSheet.create({
   },
 
   exercise: {
-    top: -235,
+    top: -275,
     width: 170,
     height: 120,
     right: -238
@@ -59,7 +60,7 @@ export const style = StyleSheet.create({
 
   text: {
     padding: 20,
-    fontSize: 40,
+    fontSize: 30,
     top: -299,
     color: 'white',
     fontFamily: 'Baloo-Bhaina',
@@ -94,6 +95,8 @@ export const style = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     top: -515
+
+    
   },
 
   iconcheck: {

@@ -18,14 +18,14 @@ export const style = StyleSheet.create({
   },
 
   logo: {
-    width: 350,
-    height: 110,
+    width: 285,
+    height: 100,
+    top: -35,
     resizeMode: "contain",
   },
 
   text: {
-    
-    marginTop: 20,
+    top:-25,
     fontSize: 32,
     fontWeight: "bold",
     color: "#333",
@@ -34,7 +34,7 @@ export const style = StyleSheet.create({
   // ÁREA DOS INPUTS
   boxMid: {
     width: "90%",
-    marginTop: 70,
+    marginTop: 40,
   },
 
   titleInput: {
@@ -44,11 +44,11 @@ export const style = StyleSheet.create({
     color: "#444",
     marginBottom: 6,
     marginLeft: 5,
-    top: -10
+    top: -45
   },
 
   boxInput: {
-    top: -10,
+    top: -48,
     width: "100%",
     height: 48,
     flexDirection: "row",
@@ -63,7 +63,7 @@ export const style = StyleSheet.create({
   // BOTÃO
   boxButton: {
     width: "100%",
-    marginTop: 60,
+    marginTop: 25,
     alignItems: "center",
     justifyContent: "center",
   },

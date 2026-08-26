@@ -52,6 +52,7 @@ export const style= StyleSheet.create({
         height: 27,
         width: 175,
         left: 20,
+        fontWeight: 'bold',
        
     },
     textButtonWithPersonal:{
@@ -59,6 +60,7 @@ export const style= StyleSheet.create({
         alignItems: 'center',
         fontSize: 18,
         textAlign: 'center',
+        fontWeight: 'bold'
         
     },
 
@@ -67,6 +69,7 @@ export const style= StyleSheet.create({
         alignItems: 'center',
         fontSize: 18,
         textAlign: 'center',
+        fontWeight: 'bold'
         
     },
 

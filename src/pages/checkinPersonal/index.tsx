@@ -42,7 +42,7 @@ export default function CheckinPersonal() {
         <TouchableOpacity
           style={style.containerButtonInicio}
           activeOpacity={0.4}
-          onPress={() => navigation.navigate("Home")} // 
+         onPress={() => navigation.popToTop()} // 
         >
           <Text style={style.textButtonInicio}>INÍCIO</Text>
         </TouchableOpacity>

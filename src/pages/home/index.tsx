@@ -1,10 +1,11 @@
-import React, { useState } from "react";
-import { Text, View, Image, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Text, View, Image, TouchableOpacity, Alert } from "react-native";
 import { style } from "./styles";
 import Topo from "../../img/topo.png";
 import Exercise from "../../img/exercise.png";
 import Rectangle from "../../icons/rectangle.png";
 import { FontDisplay, useFonts } from "expo-font";
+import { supabase } from "../../lib/supabase";
 
 // IMPORTA TIPAGEM DAS ROTAS
 import { useNavigation } from "@react-navigation/native";
@@ -15,6 +16,17 @@ import { RootStackParamList } from "../../../App"; // <-- ajuste o caminho corre
 type NavProps = NativeStackNavigationProp<RootStackParamList, "Home">;
 
 export default function Home() {
+async function handleLogout() {
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    console.log("Erro ao sair:", error);
+    Alert.alert("Erro", "Não foi possível sair da conta.");
+  }
+}
+
+const [nome, setNome] = useState("");
+
   // Define navegação com tipo correto
   const navigation = useNavigation<NavProps>();
 
@@ -25,11 +37,44 @@ export default function Home() {
     },
   });
 
+  useEffect(() => {
+  async function carregarPerfil() {
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        console.log("Erro ao buscar usuário:", userError);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("nome")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.log("Erro ao buscar perfil:", error);
+        return;
+      }
+
+      setNome(data.nome);
+    } catch (error) {
+      console.log("Erro inesperado:", error);
+    }
+  }
+
+  carregarPerfil();
+}, []);
+
   return (
     <View style={style.container}>
       <View>
         <Image source={Topo} style={style.topo} />
-        <Text style={style.text}>OLÁ, PEDRO!</Text>
+        <Text style={style.text}>Bem-vindo, {nome || "Aluno"}</Text>
 
         <Image source={Exercise} style={style.exercise} />
 
@@ -134,12 +179,13 @@ export default function Home() {
                  
                        
       </View>
-      <TouchableOpacity 
-      style={style.containerButtonInicio}
-     onPress={() => navigation.navigate("Login")}
-    activeOpacity={0.4}>
-    <Text style={style.textButtonSair}>SAIR</Text>
-</TouchableOpacity>               
+     <TouchableOpacity
+  style={style.containerButtonInicio}
+  onPress={handleLogout}
+  activeOpacity={0.4}
+>
+  <Text style={style.textButtonSair}>SAIR</Text>
+</TouchableOpacity>
     </View>
   );
 }

@@ -6,31 +6,65 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import { style } from "./styles";
 import Logo from "../../img/logo.png";
+import { supabase } from "../../lib/supabase";
+import { RootStackParamList } from "../../../App";
+
+type NavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Login"
+>;
 
 export default function Login() {
+  const navigation = useNavigation<NavigationProp>();
+
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(true);
   const [loading, setLoading] = useState(false);
 
   async function getLogin() {
+    if (!user.trim() || !password) {
+      Alert.alert("Atenção", "Informe seu e-mail e senha.");
+      return;
+    }
+
     try {
       setLoading(true);
-      if (!user || !password) {
-        return Alert.alert("Atenção", "Informe seus dados para logar");
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: user.trim(),
+        password,
+      });
+
+      if (error) {
+        console.log("Erro de login:", error);
+
+        Alert.alert(
+          "Não foi possível entrar",
+          "E-mail ou senha inválidos."
+        );
+
+        return;
       }
 
-      setTimeout(() => {
-        Alert.alert("Logado com sucesso");
-        setLoading(false);
-      }, 3000);
+      
     } catch (error) {
-      console.log(error);
+      console.log("Erro inesperado:", error);
+
+      Alert.alert(
+        "Erro",
+        "Não foi possível realizar o login. Tente novamente."
+      );
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -42,29 +76,48 @@ export default function Login() {
       </View>
 
       <View style={style.boxMid}>
-        <Text style={style.titleInput}>USUÁRIO</Text>
+        <Text style={style.titleInput}>E-MAIL</Text>
 
         <View style={style.boxInput}>
           <TextInput
-            placeholder="Digite seu usuário"
+            placeholder="Digite seu e-mail"
             placeholderTextColor="#999"
             value={user}
             onChangeText={setUser}
-            style={{ flex: 1, textAlignVertical: "center", fontSize: 16 }}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            style={{
+              flex: 1,
+              textAlignVertical: "center",
+              fontSize: 16,
+            }}
           />
         </View>
 
         <Text style={style.titleInput}>SENHA</Text>
 
-        {/* Campo senha com ícone */}
-        <View style={[style.boxInput, { flexDirection: "row", alignItems: "center" }]}>
+        <View
+          style={[
+            style.boxInput,
+            {
+              flexDirection: "row",
+              alignItems: "center",
+            },
+          ]}
+        >
           <TextInput
             placeholder="Digite sua senha"
             placeholderTextColor="#999"
             value={password}
             onChangeText={setPassword}
             secureTextEntry={showPassword}
-            style={{ flex: 1, textAlignVertical: "center", fontSize: 16, paddingLeft: 10 }}
+            style={{
+              flex: 1,
+              textAlignVertical: "center",
+              fontSize: 16,
+              paddingLeft: 10,
+            }}
           />
 
           <TouchableOpacity
@@ -72,7 +125,11 @@ export default function Login() {
             style={{ paddingHorizontal: 10 }}
           >
             <Ionicons
-              name={showPassword ? "eye-off-outline" : "eye-outline"}
+              name={
+                showPassword
+                  ? "eye-off-outline"
+                  : "eye-outline"
+              }
               size={22}
               color="#555"
             />
@@ -81,7 +138,11 @@ export default function Login() {
       </View>
 
       <View style={style.boxButton}>
-        <TouchableOpacity style={style.button} onPress={() => getLogin()}>
+        <TouchableOpacity
+          style={style.button}
+          onPress={getLogin}
+          disabled={loading}
+        >
           {loading ? (
             <ActivityIndicator />
           ) : (
