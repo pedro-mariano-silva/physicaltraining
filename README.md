@@ -1,4 +1,4 @@
-# physicaltraining#
+# PontoFitt#
 
 ## Aplicação em desenvolvimento.
 
