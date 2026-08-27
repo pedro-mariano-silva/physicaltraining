@@ -74,7 +74,7 @@ const [nome, setNome] = useState("");
     <View style={style.container}>
       <View>
         <Image source={Topo} style={style.topo} />
-        <Text style={style.text}>Bem-vindo, {nome || "Aluno"}</Text>
+        <Text style={style.text}>Olá, {nome || "Aluno"}</Text>
 
         <Image source={Exercise} style={style.exercise} />
 

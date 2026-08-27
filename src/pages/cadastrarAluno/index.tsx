@@ -13,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { RootStackParamList } from "../../../App";
+import { supabase } from "../../lib/supabase";
 import { style } from "./styles";
 
 type NavProps = NativeStackNavigationProp<
@@ -30,7 +31,11 @@ export default function CadastrarAluno() {
   const [loading, setLoading] = useState(false);
 
   async function cadastrarAluno() {
-    if (!nome.trim() || !email.trim() || !senha) {
+    const nomeLimpo = nome.trim();
+    const emailLimpo = email.trim().toLowerCase();
+    const telefoneLimpo = telefone.trim();
+
+    if (!nomeLimpo || !emailLimpo || !senha) {
       Alert.alert(
         "Atenção",
         "Preencha nome, e-mail e senha."
@@ -38,22 +43,114 @@ export default function CadastrarAluno() {
       return;
     }
 
+    if (senha.length < 6) {
+      Alert.alert(
+        "Atenção",
+        "A senha deve possuir pelo menos 6 caracteres."
+      );
+      return;
+    }
+
     try {
       setLoading(true);
 
-      // Por enquanto só validamos a tela.
-      // Depois vamos chamar a Edge Function do Supabase.
+      console.log("Chamando Edge Function criar-aluno...");
+
+      const { data, error } =
+        await supabase.functions.invoke(
+          "criar-aluno",
+          {
+            body: {
+              nome: nomeLimpo,
+              email: emailLimpo,
+              telefone: telefoneLimpo,
+              senha,
+            },
+          }
+        );
+
+      console.log("RETORNO FUNCTION DATA:", data);
+      console.log("RETORNO FUNCTION ERROR:", error);
+
+      if (error) {
+        let mensagemErro =
+          error.message ||
+          "Não foi possível cadastrar o aluno.";
+
+        try {
+          const context = (error as any).context;
+
+          console.log(
+            "EDGE FUNCTION ERROR CONTEXT:",
+            context
+          );
+
+          if (context) {
+            const resposta = await context.json();
+
+            console.log(
+              "RESPOSTA DA EDGE FUNCTION:",
+              resposta
+            );
+
+            if (resposta?.error) {
+              mensagemErro = resposta.error;
+            }
+          }
+        } catch (erroContexto) {
+          console.log(
+            "Não foi possível ler o corpo do erro:",
+            erroContexto
+          );
+        }
+
+        Alert.alert(
+          "Erro ao cadastrar aluno",
+          mensagemErro
+        );
+
+        return;
+      }
+
+      if (!data?.success) {
+        console.log(
+          "FUNCTION RETORNOU SEM SUCCESS:",
+          data
+        );
+
+        Alert.alert(
+          "Erro ao cadastrar aluno",
+          data?.error ??
+            "Não foi possível cadastrar o aluno."
+        );
+
+        return;
+      }
 
       Alert.alert(
-        "Cadastro",
-        "Tela pronta. No próximo passo vamos conectar ao Supabase."
+        "Aluno cadastrado",
+        `${nomeLimpo} foi cadastrado com sucesso.`,
+        [
+          {
+            text: "OK",
+            onPress: () => navigation.goBack(),
+          },
+        ]
       );
+
+      setNome("");
+      setEmail("");
+      setTelefone("");
+      setSenha("");
     } catch (error) {
-      console.log("Erro:", error);
+      console.log(
+        "ERRO INESPERADO NO CADASTRO:",
+        error
+      );
 
       Alert.alert(
         "Erro",
-        "Não foi possível cadastrar o aluno."
+        "Ocorreu um erro inesperado ao cadastrar o aluno."
       );
     } finally {
       setLoading(false);
@@ -69,6 +166,7 @@ export default function CadastrarAluno() {
       <TouchableOpacity
         style={style.backButton}
         onPress={() => navigation.goBack()}
+        activeOpacity={0.7}
       >
         <Text style={style.backButtonText}>
           ‹ Voltar
@@ -92,6 +190,7 @@ export default function CadastrarAluno() {
         placeholder="Nome completo"
         value={nome}
         onChangeText={setNome}
+        autoCapitalize="words"
       />
 
       <Text style={style.label}>
@@ -130,6 +229,7 @@ export default function CadastrarAluno() {
         secureTextEntry
         value={senha}
         onChangeText={setSenha}
+        autoCapitalize="none"
       />
 
       <TouchableOpacity
