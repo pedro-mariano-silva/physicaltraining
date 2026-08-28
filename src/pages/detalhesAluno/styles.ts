@@ -46,7 +46,36 @@ export const style = StyleSheet.create({
     fontSize: 14,
     color: "#777",
     marginTop: 5,
+    marginBottom: 20,
+  },
+
+  editButton: {
+    height: 46,
+    borderRadius: 12,
+
+    backgroundColor: "#248A3D",
+
+    justifyContent: "center",
+    alignItems: "center",
+
     marginBottom: 24,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+
+    elevation: 2,
+  },
+
+  editButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
+    textAlign: "center",
   },
 
   summaryCard: {
@@ -143,9 +172,10 @@ export const style = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     marginBottom: 10,
+
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
 
     shadowColor: "#000",
     shadowOffset: {
@@ -156,6 +186,11 @@ export const style = StyleSheet.create({
     shadowRadius: 2,
 
     elevation: 2,
+  },
+
+  historyContent: {
+    flex: 1,
+    paddingRight: 12,
   },
 
   historyDate: {
@@ -174,6 +209,56 @@ export const style = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#444",
+  },
+
+  reposicaoStatus: {
+    marginTop: 8,
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#D97706",
+  },
+
+  reporButton: {
+    marginTop: 12,
+    minHeight: 40,
+    paddingHorizontal: 14,
+
+    borderWidth: 2,
+    borderColor: "#D97706",
+
+    borderRadius: 10,
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    backgroundColor: "#FFFFFF",
+  },
+
+  reporButtonText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#D97706",
+    textAlign: "center",
+  },
+
+  realizadaButton: {
+    marginTop: 12,
+    minHeight: 40,
+    paddingHorizontal: 14,
+
+    borderRadius: 10,
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    backgroundColor: "#248A3D",
+  },
+
+  realizadaButtonText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    textAlign: "center",
   },
 
   emptyCard: {

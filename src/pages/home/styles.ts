@@ -1,134 +1,143 @@
-import { StyleSheet } from "react-native";
+import {
+  StyleSheet,
+} from "react-native";
 
-export const style = StyleSheet.create({
-  container: {},
-
-  containerIcon: {
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    justifyContent: 'space-around',
-    paddingTop: 85,
-    top: -301
-  },
-
-  containerTextIcon: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    top: -120,
-    fontWeight: 'bold'
-  },
-
-  containerTextIcon2: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    top: 53
-  },
-
-  containerButtonInicio:{
-        backgroundColor: '#4DA953',        
-        borderRadius: 15,
-        height: 27,
-        width: 150,
-        left: 120,
-        top: -320,
-        
+export const style =
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#FFFFFF",
     },
 
-    textButtonSair:{
-        color: 'white',
-        alignItems: 'center',
-        fontSize: 20,
-        textAlign: 'center',
-        fontWeight: 'bold',
-        
-        
+    // ==========================================
+    // TOPO
+    // ==========================================
+
+    topo: {
+      top: -150,
+      width: 395,
+      height: 365,
     },
 
+    text: {
+      padding: 20,
+      fontSize: 30,
+      top: -299,
+      color: "white",
+      fontFamily: "Baloo-Bhaina",
+      fontWeight: "bold",
+    },
 
-  topo: {
-    top: -150,
-    width: 395,
-    height: 365
-  },
+    exercise: {
+      top: -275,
+      width: 170,
+      height: 120,
+      right: -238,
+    },
 
-  exercise: {
-    top: -275,
-    width: 170,
-    height: 120,
-    right: -238
-  },
+    // ==========================================
+    // OPÇÕES
+    // ==========================================
 
-  text: {
-    padding: 20,
-    fontSize: 30,
-    top: -299,
-    color: 'white',
-    fontFamily: 'Baloo-Bhaina',
-    fontWeight: 'bold'
-  },
+    optionsContainer: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      alignItems: "flex-start",
 
-  textIconAviso: {
-    left: -15
-  },
+      marginTop: -235,
 
-  textIconCheckin: {
-    left: 18
-  },
+      paddingHorizontal: 20,
+    },
 
-  textIconDicas: {
-    left: 18
-  },
+    option: {
+      width: 150,
+      alignItems: "center",
+    },
 
-  textCorpo:{
-    left: 10
-  },
+    optionText: {
+      fontSize: 14,
+      fontWeight: "bold",
+      color: "#222",
 
-  textIconPagamento: {
-    left: 16
-  },
+      marginBottom: 10,
 
-  textHistorico:{
-    left: 20
-  },
+      textAlign: "center",
+    },
 
-  buttonIcon: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    top: -515
+    // ==========================================
+    // RETÂNGULO + ÍCONE
+    // ==========================================
 
-    
-  },
+    rectangleContainer: {
+      width: 142,
+      height: 105,
 
-  iconcheck: {
-    top: 7,
-    left: 2
-  },
+      justifyContent: "center",
+      alignItems: "center",
 
-  iconGraphic: {
-    left: 2,
-    top: -11,
-    width: 45
-  },
+      position: "relative",
+    },
 
-  iconNotification: {
-    top: -10,
-    left: 11
-  },
+    rectangle: {
+      width: 90,
+      height: 120,
 
-  buttonIcon2: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    top: -436,
-    left: 8
-  },
+      resizeMode: "contain",
 
-  iconIdea: {
-    left: 6,
-    top: 4
-  },
+      position: "absolute",
+    },
 
-  iconMoney: {
-    left: -2,
-    top: 1
-  }
-});
+    iconCheck: {
+      width: 48,
+      height: 48,
+
+      resizeMode: "contain",
+
+      zIndex: 2,
+    },
+
+    iconMoney: {
+      width: 65,
+      height: 48,
+
+      resizeMode: "contain",
+
+      zIndex: 2,
+    },
+
+    // ==========================================
+    // SAIR
+    // ==========================================
+
+    logoutArea: {
+      flex: 1,
+
+      justifyContent: "flex-end",
+      alignItems: "center",
+
+      paddingBottom: 35,
+    },
+
+    containerButtonInicio: {
+      backgroundColor: "#4DA953",
+
+      borderRadius: 15,
+
+      height: 34,
+      width: 150,
+
+      justifyContent: "center",
+      alignItems: "center",
+      top: -150,
+    },
+
+    textButtonSair: {
+      color: "white",
+
+      fontSize: 18,
+
+      textAlign: "center",
+
+      fontWeight: "bold",
+    },
+  });
