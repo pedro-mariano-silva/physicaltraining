@@ -62,15 +62,16 @@ export default function App() {
       .eq("id", userId)
       .single();
 
-    if (error) {
-      console.log(
-        "Erro ao buscar tipo do usuário:",
-        error
-      );
+if (error) {
+  console.log("Erro ao buscar tipo do usuário:", error);
 
-      setTipoUsuario(null);
-      return;
-    }
+  await supabase.auth.signOut();
+
+  setTipoUsuario(null);
+  setSession(null);
+
+  return;
+}
 
     setTipoUsuario(data.tipo as TipoUsuario);
   }

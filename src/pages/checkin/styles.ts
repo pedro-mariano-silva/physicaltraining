@@ -1,86 +1,224 @@
 import { StyleSheet } from "react-native";
 
+export const style = StyleSheet.create({
+  // ========================================
+  // TELA
+  // ========================================
 
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
 
+  // ========================================
+  // TOPO
+  // ========================================
 
+  topo: {
+    top: -150,
+    width: 395,
+    height: 365,
+  },
 
-export const style= StyleSheet.create({
+  text: {
+    padding: 20,
+    fontSize: 40,
+    top: -299,
+    color: "white",
+    fontFamily: "Baloo-Bhaina",
+    fontWeight: "bold",
+    left: 60,
+  },
 
-    container:{
-        
+  // ========================================
+  // TÍTULO
+  // ========================================
 
+  containerTitle: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    top: -185,
+    paddingHorizontal: 20,
+  },
+
+  title: {
+    fontSize: 25,
+    textAlign: "center",
+  },
+
+  // ========================================
+  // TIPOS DE TREINO
+  // ========================================
+
+  containerTreinos: {
+    width: "100%",
+    paddingHorizontal: 20,
+
+    flexDirection: "row",
+    flexWrap: "wrap",
+
+    justifyContent: "space-between",
+
+    top: -165,
+  },
+
+  botaoTreino: {
+    width: "48%",
+    height: 48,
+
+    marginBottom: 12,
+
+    borderWidth: 2,
+    borderColor: "#4DA953",
+
+    borderRadius: 12,
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    backgroundColor: "#FFFFFF",
+  },
+
+  botaoTreinoSelecionado: {
+    backgroundColor: "#4DA953",
+  },
+
+  textoTreino: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#4DA953",
+    textAlign: "center",
+  },
+
+  textoTreinoSelecionado: {
+    color: "#FFFFFF",
+  },
+
+  // ========================================
+  // MODAL - FUNDO
+  // ========================================
+
+  modalOverlay: {
+    flex: 1,
+
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    paddingHorizontal: 25,
+  },
+
+  // ========================================
+  // MODAL - CONTAINER
+  // ========================================
+
+  modalContainer: {
+    width: "100%",
+    maxWidth: 360,
+
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 18,
+
+    paddingHorizontal: 24,
+    paddingVertical: 28,
+
+    alignItems: "center",
+
+    elevation: 8,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
     },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
 
-    containerTitle:{
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
+  // ========================================
+  // NOME DO TREINO NO MODAL
+  // ========================================
 
-        top: -185,
-       
-    },
+  modalTreino: {
+    fontSize: 22,
+    fontWeight: "700",
 
- 
+    color: "#4DA953",
 
-    topo:{
-        top: -150,
-        width:395,
-        height:365,
-    
-    },
+    textAlign: "center",
 
-    text:{
-        padding: 20,
-        fontSize: 40,
-        top: -299,
-        color: 'white',
-        fontFamily:'Baloo-Bhaina',
-        fontWeight:'bold',
-        left: 60
-  
-    },
+    marginBottom: 10,
+  },
 
-    
-    title:{
-        fontSize: 25,
+  // ========================================
+  // PERGUNTA DO MODAL
+  // ========================================
 
-    },
-    containerButtonWithPersonal:{
-        backgroundColor: '#4DA953',        
-        borderRadius: 15,
-        height: 27,
-        width: 175,
-        left: 20,
-        fontWeight: 'bold',
-       
-    },
-    textButtonWithPersonal:{
-        color: 'white',
-        alignItems: 'center',
-        fontSize: 18,
-        textAlign: 'center',
-        fontWeight: 'bold'
-        
-    },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
 
-    textButtonWithoutPersonal:{
-        color: 'white',
-        alignItems: 'center',
-        fontSize: 18,
-        textAlign: 'center',
-        fontWeight: 'bold'
-        
-    },
+    color: "#222",
 
-    containerButton:{
-        left: -19,
-        padding: 5,
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    }
+    textAlign: "center",
 
-   
-  
+    marginBottom: 25,
+  },
 
-})
+  // ========================================
+  // BOTÕES DO MODAL
+  // ========================================
+
+  modalButton: {
+    width: "100%",
+    height: 50,
+
+    backgroundColor: "#4DA953",
+
+    borderRadius: 12,
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    marginBottom: 12,
+  },
+
+  modalButtonText: {
+    color: "#FFFFFF",
+
+    fontSize: 16,
+    fontWeight: "700",
+
+    textAlign: "center",
+  },
+
+  // ========================================
+  // CANCELAR
+  // ========================================
+
+  modalCancelButton: {
+  width: "100%",
+  height: 45,
+
+  justifyContent: "center",
+  alignItems: "center",
+
+  marginTop: 3,
+
+  borderWidth: 2,
+  borderColor: "#4DA953",
+  borderRadius: 12,
+
+  backgroundColor: "#FFFFFF",
+},
+
+modalCancelText: {
+  color: "#000000",
+
+  fontSize: 14,
+  fontWeight: "700",
+},
+});

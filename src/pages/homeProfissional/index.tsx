@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,11 @@ import {
   ScrollView,
 } from "react-native";
 
-import { useNavigation } from "@react-navigation/native";
+import {
+  useNavigation,
+  useFocusEffect,
+} from "@react-navigation/native";
+
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { supabase } from "../../lib/supabase";
@@ -26,10 +30,17 @@ type AlunoProfissional = {
   nome: string;
 };
 
+type TipoTreino =
+  | "treino_a"
+  | "treino_b"
+  | "treino_unico"
+  | "treino_ab";
+
 type CheckinHoje = {
   id: string;
   aluno_id: string;
   tipo: "com_personal" | "sem_personal";
+  tipo_treino: TipoTreino | null;
   horario_checkin: string;
 };
 
@@ -41,9 +52,11 @@ export default function HomeProfissional() {
   const [alunos, setAlunos] = useState<AlunoProfissional[]>([]);
   const [checkinsHoje, setCheckinsHoje] = useState<CheckinHoje[]>([]);
 
-  useEffect(() => {
-    carregarDados();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      carregarDados();
+    }, [])
+  );
 
   async function carregarDados() {
     try {
@@ -71,14 +84,20 @@ export default function HomeProfissional() {
       // 2. NOME DO PROFISSIONAL
       // ========================================
 
-      const { data: profile, error: profileError } = await supabase
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
         .from("profiles")
         .select("nome")
         .eq("id", user.id)
         .single();
 
       if (profileError) {
-        console.log("Erro profile:", profileError);
+        console.log(
+          "Erro profile:",
+          profileError
+        );
       } else {
         setNome(profile.nome);
       }
@@ -87,14 +106,19 @@ export default function HomeProfissional() {
       // 3. CADASTRO DO PROFISSIONAL
       // ========================================
 
-      const { data: profissional, error: profissionalError } =
-        await supabase
-          .from("profissionais")
-          .select("id")
-          .eq("user_id", user.id)
-          .single();
+      const {
+        data: profissional,
+        error: profissionalError,
+      } = await supabase
+        .from("profissionais")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
 
-      if (profissionalError || !profissional) {
+      if (
+        profissionalError ||
+        !profissional
+      ) {
         console.log(
           "Erro profissional:",
           profissionalError
@@ -112,14 +136,22 @@ export default function HomeProfissional() {
       // 4. ALUNOS VINCULADOS
       // ========================================
 
-      const { data: alunosData, error: alunosError } =
-        await supabase
-          .from("alunos")
-          .select("id, user_id")
-          .eq("profissional_id", profissional.id);
+      const {
+        data: alunosData,
+        error: alunosError,
+      } = await supabase
+        .from("alunos")
+        .select("id, user_id")
+        .eq(
+          "profissional_id",
+          profissional.id
+        );
 
       if (alunosError) {
-        console.log("Erro alunos:", alunosError);
+        console.log(
+          "Erro alunos:",
+          alunosError
+        );
 
         Alert.alert(
           "Erro",
@@ -129,22 +161,26 @@ export default function HomeProfissional() {
         return;
       }
 
-      const alunosBase = alunosData ?? [];
+      const alunosBase =
+        alunosData ?? [];
 
       // ========================================
       // 5. BUSCA OS NOMES DOS ALUNOS
       // ========================================
 
       if (alunosBase.length > 0) {
-        const userIds = alunosBase.map(
-          (aluno) => aluno.user_id
-        );
+        const userIds =
+          alunosBase.map(
+            (aluno) => aluno.user_id
+          );
 
-        const { data: profilesAlunos, error: profilesError } =
-          await supabase
-            .from("profiles")
-            .select("id, nome")
-            .in("id", userIds);
+        const {
+          data: profilesAlunos,
+          error: profilesError,
+        } = await supabase
+          .from("profiles")
+          .select("id, nome")
+          .in("id", userIds);
 
         if (profilesError) {
           console.log(
@@ -160,19 +196,27 @@ export default function HomeProfissional() {
           return;
         }
 
-        const listaAlunos: AlunoProfissional[] =
-          alunosBase.map((aluno) => {
-            const perfil = profilesAlunos?.find(
-              (profile) =>
-                profile.id === aluno.user_id
-            );
+        const listaAlunos:
+          AlunoProfissional[] =
+          alunosBase.map(
+            (aluno) => {
+              const perfil =
+                profilesAlunos?.find(
+                  (profile) =>
+                    profile.id ===
+                    aluno.user_id
+                );
 
-            return {
-              id: aluno.id,
-              user_id: aluno.user_id,
-              nome: perfil?.nome ?? "Aluno",
-            };
-          });
+              return {
+                id: aluno.id,
+                user_id:
+                  aluno.user_id,
+                nome:
+                  perfil?.nome ??
+                  "Aluno",
+              };
+            }
+          );
 
         setAlunos(listaAlunos);
       } else {
@@ -191,23 +235,32 @@ export default function HomeProfissional() {
       // 7. CHECK-INS DE HOJE
       // ========================================
 
-      const { data: checkins, error: checkinsError } =
-        await supabase
-          .from("checkins")
-          .select(`
-            id,
-            aluno_id,
-            tipo,
-            horario_checkin
-          `)
-          .eq(
-            "profissional_id",
-            profissional.id
-          )
-          .eq("data_checkin", hoje)
-          .order("horario_checkin", {
+      const {
+        data: checkins,
+        error: checkinsError,
+      } = await supabase
+        .from("checkins")
+       .select(`
+  id,
+  aluno_id,
+  tipo,
+  tipo_treino,
+  horario_checkin
+`)
+        .eq(
+          "profissional_id",
+          profissional.id
+        )
+        .eq(
+          "data_checkin",
+          hoje
+        )
+        .order(
+          "horario_checkin",
+          {
             ascending: false,
-          });
+          }
+        );
 
       if (checkinsError) {
         console.log(
@@ -261,8 +314,12 @@ export default function HomeProfissional() {
   // HORÁRIO
   // ========================================
 
-  function formatarHorario(data: string) {
-    return new Date(data).toLocaleTimeString(
+  function formatarHorario(
+    data: string
+  ) {
+    return new Date(
+      data
+    ).toLocaleTimeString(
       "pt-BR",
       {
         hour: "2-digit",
@@ -271,13 +328,37 @@ export default function HomeProfissional() {
     );
   }
 
+  function formatarTipoTreino(
+  tipoTreino: TipoTreino | null
+) {
+  switch (tipoTreino) {
+    case "treino_a":
+      return "Treino A";
+
+    case "treino_b":
+      return "Treino B";
+
+    case "treino_unico":
+      return "Treino Único";
+
+    case "treino_ab":
+      return "Treino A+B";
+
+    default:
+      return "Treino não informado";
+  }
+}
+
   // ========================================
   // ENCONTRA ALUNO PELO ID
   // ========================================
 
-  function buscarAluno(alunoId: string) {
+  function buscarAluno(
+    alunoId: string
+  ) {
     return alunos.find(
-      (aluno) => aluno.id === alunoId
+      (aluno) =>
+        aluno.id === alunoId
     );
   }
 
@@ -287,10 +368,18 @@ export default function HomeProfissional() {
 
   if (loading) {
     return (
-      <View style={style.loadingContainer}>
-        <ActivityIndicator size="large" />
+      <View
+        style={
+          style.loadingContainer
+        }
+      >
+        <ActivityIndicator
+          size="large"
+        />
 
-        <Text style={style.loadingText}>
+        <Text
+          style={style.loadingText}
+        >
           Carregando...
         </Text>
       </View>
@@ -303,22 +392,32 @@ export default function HomeProfissional() {
       contentContainerStyle={
         style.contentContainer
       }
-      showsVerticalScrollIndicator={false}
+      showsVerticalScrollIndicator={
+        false
+      }
     >
       {/* CABEÇALHO */}
 
       <View style={style.header}>
-        <Text style={style.welcomeText}>
+        <Text
+          style={
+            style.welcomeText
+          }
+        >
           Olá,
         </Text>
 
         <Text
-          style={style.professionalName}
+          style={
+            style.professionalName
+          }
         >
           {nome}
         </Text>
 
-        <Text style={style.subtitle}>
+        <Text
+          style={style.subtitle}
+        >
           Acompanhe seus alunos e os check-ins de hoje.
         </Text>
       </View>
@@ -326,31 +425,49 @@ export default function HomeProfissional() {
       {/* RESUMO */}
 
       <View
-        style={style.summaryContainer}
+        style={
+          style.summaryContainer
+        }
       >
-        <View style={style.summaryCard}>
+        <View
+          style={
+            style.summaryCard
+          }
+        >
           <Text
-            style={style.summaryNumber}
+            style={
+              style.summaryNumber
+            }
           >
             {alunos.length}
           </Text>
 
           <Text
-            style={style.summaryLabel}
+            style={
+              style.summaryLabel
+            }
           >
             Alunos
           </Text>
         </View>
 
-        <View style={style.summaryCard}>
+        <View
+          style={
+            style.summaryCard
+          }
+        >
           <Text
-            style={style.summaryNumber}
+            style={
+              style.summaryNumber
+            }
           >
             {checkinsHoje.length}
           </Text>
 
           <Text
-            style={style.summaryLabel}
+            style={
+              style.summaryLabel
+            }
           >
             Presentes hoje
           </Text>
@@ -359,215 +476,299 @@ export default function HomeProfissional() {
 
       {/* CHECK-INS */}
 
-      <Text style={style.sectionTitle}>
+      <Text
+        style={
+          style.sectionTitle
+        }
+      >
         Check-ins de hoje
       </Text>
 
-      {checkinsHoje.length === 0 ? (
-        <View style={style.emptyCard}>
-          <Text style={style.emptyTitle}>
+      {checkinsHoje.length ===
+      0 ? (
+        <View
+          style={
+            style.emptyCard
+          }
+        >
+          <Text
+            style={
+              style.emptyTitle
+            }
+          >
             Nenhum check-in hoje
           </Text>
 
-          <Text style={style.emptyText}>
+          <Text
+            style={
+              style.emptyText
+            }
+          >
             Os check-ins dos seus alunos aparecerão aqui.
           </Text>
         </View>
       ) : (
-        checkinsHoje.map((item) => {
-          const aluno = buscarAluno(
-            item.aluno_id
-          );
+        checkinsHoje.map(
+          (item) => {
+            const aluno =
+              buscarAluno(
+                item.aluno_id
+              );
 
-          const nomeAluno =
-            aluno?.nome ?? "Aluno";
+            const nomeAluno =
+              aluno?.nome ??
+              "Aluno";
 
-          return (
-            <View
-              key={item.id}
-              style={style.checkinCard}
-            >
+            return (
               <View
+                key={item.id}
                 style={
-                  style.checkinHeader
+                  style.checkinCard
                 }
               >
-                <View style={style.avatar}>
-                  <Text
-                    style={style.avatarText}
-                  >
-                    {nomeAluno
-                      .charAt(0)
-                      .toUpperCase()}
-                  </Text>
-                </View>
-
                 <View
                   style={
-                    style.checkinInfo
+                    style.checkinHeader
                   }
                 >
-                  <Text
+                  <View
                     style={
-                      style.studentName
+                      style.avatar
                     }
                   >
-                    {nomeAluno}
-                  </Text>
+                    <Text
+                      style={
+                        style.avatarText
+                      }
+                    >
+                      {nomeAluno
+                        .charAt(0)
+                        .toUpperCase()}
+                    </Text>
+                  </View>
 
-                  <Text
+                  <View
                     style={
-                      style.checkinType
+                      style.checkinInfo
                     }
                   >
-                    {item.tipo ===
-                    "com_personal"
-                      ? "Com personal"
-                      : "Sem personal"}
-                  </Text>
-                </View>
+                    <Text
+                      style={
+                        style.studentName
+                      }
+                    >
+                      {nomeAluno}
+                    </Text>
 
-                <View
-                  style={
-                    style.timeContainer
-                  }
-                >
-                  <Text
-                    style={style.timeText}
+                    <Text
+  style={style.checkinType}
+>
+  {formatarTipoTreino(
+    item.tipo_treino
+  )}
+
+  {" • "}
+
+  {item.tipo === "com_personal"
+    ? "Com personal"
+    : "Sem personal"}
+</Text>
+                  </View>
+
+                  <View
+                    style={
+                      style.timeContainer
+                    }
                   >
-                    {formatarHorario(
-                      item.horario_checkin
-                    )}
-                  </Text>
+                    <Text
+                      style={
+                        style.timeText
+                      }
+                    >
+                      {formatarHorario(
+                        item.horario_checkin
+                      )}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          );
-        })
+            );
+          }
+        )
       )}
-
-      
 
       {/* MEUS ALUNOS */}
 
-      <Text style={style.sectionTitle}>
+      <Text
+        style={
+          style.sectionTitle
+        }
+      >
         Meus alunos
       </Text>
 
       {alunos.length === 0 ? (
-        <View style={style.emptyCard}>
-          <Text style={style.emptyTitle}>
+        <View
+          style={
+            style.emptyCard
+          }
+        >
+          <Text
+            style={
+              style.emptyTitle
+            }
+          >
             Nenhum aluno
           </Text>
 
-          <Text style={style.emptyText}>
+          <Text
+            style={
+              style.emptyText
+            }
+          >
             Você ainda não possui alunos vinculados.
           </Text>
         </View>
       ) : (
-        alunos.map((aluno) => {
-          const checkin =
-            checkinsHoje.find(
-              (item) =>
-                item.aluno_id === aluno.id
-            );
+        alunos.map(
+          (aluno) => {
+            const checkin =
+              checkinsHoje.find(
+                (item) =>
+                  item.aluno_id ===
+                  aluno.id
+              );
 
-          return (
-            <TouchableOpacity
-              key={aluno.id}
-              style={style.studentCard}
-              activeOpacity={0.7}
-              onPress={() =>
-                navigation.navigate(
-                  "DetalhesAluno",
-                  {
-                    alunoId: aluno.id,
-                  }
-                )
-              }
-            >
-              <View
+            return (
+              <TouchableOpacity
+                key={aluno.id}
                 style={
-                  style.studentHeader
+                  style.studentCard
+                }
+                activeOpacity={
+                  0.7
+                }
+                onPress={() =>
+                  navigation.navigate(
+                    "DetalhesAluno",
+                    {
+                      alunoId:
+                        aluno.id,
+                    }
+                  )
                 }
               >
-                <View style={style.avatar}>
-                  <Text
-                    style={style.avatarText}
-                  >
-                    {aluno.nome
-                      .charAt(0)
-                      .toUpperCase()}
-                  </Text>
-                </View>
-
                 <View
                   style={
-                    style.studentInfo
+                    style.studentHeader
                   }
                 >
-                  <Text
+                  <View
                     style={
-                      style.studentName
+                      style.avatar
                     }
                   >
-                    {aluno.nome}
-                  </Text>
-
-                  {checkin ? (
-                    <>
-                      <Text
-                        style={
-                          style.presentText
-                        }
-                      >
-                        ✓ Presente hoje
-                      </Text>
-
-                      <Text
-                        style={
-                          style.studentDetails
-                        }
-                      >
-                        {checkin.tipo ===
-                        "com_personal"
-                          ? "Com personal"
-                          : "Sem personal"}
-
-                        {" • "}
-
-                        {formatarHorario(
-                          checkin.horario_checkin
-                        )}
-                      </Text>
-                    </>
-                  ) : (
                     <Text
                       style={
-                        style.absentText
+                        style.avatarText
                       }
                     >
-                      Ainda não fez check-in hoje
+                      {aluno.nome
+                        .charAt(0)
+                        .toUpperCase()}
                     </Text>
-                  )}
+                  </View>
+
+                  <View
+                    style={
+                      style.studentInfo
+                    }
+                  >
+                    <Text
+                      style={
+                        style.studentName
+                      }
+                    >
+                      {aluno.nome}
+                    </Text>
+
+                    {checkin ? (
+                      <>
+                        <Text
+                          style={
+                            style.presentText
+                          }
+                        >
+                          ✓ Presente hoje
+                        </Text>
+
+                        <Text
+                          style={
+                            style.studentDetails
+                          }
+                        >
+                         {formatarTipoTreino(
+  checkin.tipo_treino
+)}
+
+{" • "}
+
+{checkin.tipo === "com_personal"
+  ? "Com personal"
+  : "Sem personal"}
+
+{" • "}
+
+{formatarHorario(
+  checkin.horario_checkin
+)}
+                        </Text>
+                      </>
+                    ) : (
+                      <Text
+                        style={
+                          style.absentText
+                        }
+                      >
+                        Ainda não fez check-in hoje
+                      </Text>
+                    )}
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          );
-        })
+              </TouchableOpacity>
+            );
+          }
+        )
       )}
-<TouchableOpacity
-  style={style.addStudentButton}
-  activeOpacity={0.7}
-  onPress={() => navigation.navigate("CadastrarAluno")}
->
-  <Text style={style.addStudentButtonText}>
-    + CADASTRAR ALUNO </Text>
- </TouchableOpacity>
+
+      {/* CADASTRAR ALUNO */}
+
+      <TouchableOpacity
+        style={
+          style.addStudentButton
+        }
+        activeOpacity={0.7}
+        onPress={() =>
+          navigation.navigate(
+            "CadastrarAluno"
+          )
+        }
+      >
+        <Text
+          style={
+            style.addStudentButtonText
+          }
+        >
+          + CADASTRAR ALUNO
+        </Text>
+      </TouchableOpacity>
+
       {/* ATUALIZAR */}
 
       <TouchableOpacity
-        style={style.updateButton}
+        style={
+          style.updateButton
+        }
         onPress={carregarDados}
         activeOpacity={0.7}
       >
@@ -583,7 +784,9 @@ export default function HomeProfissional() {
       {/* SAIR */}
 
       <TouchableOpacity
-        style={style.logoutButton}
+        style={
+          style.logoutButton
+        }
         onPress={handleLogout}
         activeOpacity={0.7}
       >
