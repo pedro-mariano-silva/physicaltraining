@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
 import {
   Text,
   View,
@@ -8,44 +12,152 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-import { style } from "./styles";
+import {
+  Ionicons,
+} from "@expo/vector-icons";
+
+import {
+  useNavigation,
+} from "@react-navigation/native";
+
+import {
+  NativeStackNavigationProp,
+} from "@react-navigation/native-stack";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import {
+  style,
+} from "./styles";
+
 import Logo from "../../img/logo.png";
-import { supabase } from "../../lib/supabase";
-import { RootStackParamList } from "../../../App";
 
-type NavigationProp = NativeStackNavigationProp<
+import {
+  supabase,
+} from "../../lib/supabase";
+
+import {
   RootStackParamList,
-  "Login"
->;
+} from "../../../App";
+
+type NavigationProp =
+  NativeStackNavigationProp<
+    RootStackParamList,
+    "Login"
+  >;
+
+const CHAVE_EMAIL =
+  "@pontofitt_email_lembrado";
 
 export default function Login() {
-  const navigation = useNavigation<NavigationProp>();
+  const navigation =
+    useNavigation<NavigationProp>();
 
-  const [user, setUser] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [
+    user,
+    setUser,
+  ] =
+    useState("");
+
+  const [
+    password,
+    setPassword,
+  ] =
+    useState("");
+
+  const [
+    showPassword,
+    setShowPassword,
+  ] =
+    useState(true);
+
+  const [
+    loading,
+    setLoading,
+  ] =
+    useState(false);
+
+  const [
+    lembrarAcesso,
+    setLembrarAcesso,
+  ] =
+    useState(false);
+
+  // ==========================================
+  // CARREGAR E-MAIL LEMBRADO
+  // ==========================================
+
+  useEffect(() => {
+    async function carregarEmailLembrado() {
+      try {
+        const emailSalvo =
+          await AsyncStorage.getItem(
+            CHAVE_EMAIL
+          );
+
+        if (emailSalvo) {
+          setUser(
+            emailSalvo
+          );
+
+          setLembrarAcesso(
+            true
+          );
+        }
+      } catch (error) {
+        console.log(
+          "Erro ao carregar e-mail salvo:",
+          error
+        );
+      }
+    }
+
+    carregarEmailLembrado();
+  }, []);
+
+  // ==========================================
+  // LOGIN
+  // ==========================================
 
   async function getLogin() {
-    if (!user.trim() || !password) {
-      Alert.alert("Atenção", "Informe seu e-mail e senha.");
+    const emailLimpo =
+      user
+        .trim()
+        .toLowerCase();
+
+    if (
+      !emailLimpo ||
+      !password
+    ) {
+      Alert.alert(
+        "Atenção",
+        "Informe seu e-mail e senha."
+      );
+
       return;
     }
 
     try {
-      setLoading(true);
+      setLoading(
+        true
+      );
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email: user.trim(),
-        password,
-      });
+      const {
+        error,
+      } =
+        await supabase.auth.signInWithPassword({
+          email:
+            emailLimpo,
+
+          password,
+        });
 
       if (error) {
-        console.log("Erro de login:", error);
+        console.log(
+          "Erro de login:",
+          error
+        );
 
         Alert.alert(
           "Não foi possível entrar",
@@ -55,74 +167,182 @@ export default function Login() {
         return;
       }
 
-      
+      // ======================================
+      // LEMBRAR ACESSO
+      // ======================================
+
+      if (
+        lembrarAcesso
+      ) {
+        await AsyncStorage.setItem(
+          CHAVE_EMAIL,
+          emailLimpo
+        );
+      } else {
+        await AsyncStorage.removeItem(
+          CHAVE_EMAIL
+        );
+      }
     } catch (error) {
-      console.log("Erro inesperado:", error);
+      console.log(
+        "Erro inesperado:",
+        error
+      );
 
       Alert.alert(
         "Erro",
         "Não foi possível realizar o login. Tente novamente."
       );
     } finally {
-      setLoading(false);
+      setLoading(
+        false
+      );
     }
   }
 
+  // ==========================================
+  // TELA
+  // ==========================================
+
   return (
-    <View style={style.container}>
-      <View style={style.boxTop}>
-        <Image source={Logo} style={style.logo} />
-        <Text style={style.text}>Login</Text>
+    <View
+      style={
+        style.container
+      }
+    >
+      <View
+        style={
+          style.boxTop
+        }
+      >
+        <Image
+          source={
+            Logo
+          }
+          style={
+            style.logo
+          }
+        />
+
+        <Text
+          style={
+            style.text
+          }
+        >
+          Login
+        </Text>
       </View>
 
-      <View style={style.boxMid}>
-        <Text style={style.titleInput}>E-MAIL</Text>
+      <View
+        style={
+          style.boxMid
+        }
+      >
+        {/* E-MAIL */}
 
-        <View style={style.boxInput}>
+        <Text
+          style={
+            style.titleInput
+          }
+        >
+          E-MAIL
+        </Text>
+
+        <View
+          style={
+            style.boxInput
+          }
+        >
           <TextInput
             placeholder="Digite seu e-mail"
             placeholderTextColor="#999"
-            value={user}
-            onChangeText={setUser}
+            value={
+              user
+            }
+            onChangeText={
+              setUser
+            }
             keyboardType="email-address"
             autoCapitalize="none"
-            autoCorrect={false}
+            autoCorrect={
+              false
+            }
+            editable={
+              !loading
+            }
             style={{
               flex: 1,
-              textAlignVertical: "center",
+              textAlignVertical:
+                "center",
               fontSize: 16,
             }}
           />
         </View>
 
-        <Text style={style.titleInput}>SENHA</Text>
+        {/* SENHA */}
+
+        <Text
+          style={
+            style.titleInput
+          }
+        >
+          SENHA
+        </Text>
 
         <View
           style={[
             style.boxInput,
             {
-              flexDirection: "row",
-              alignItems: "center",
+              flexDirection:
+                "row",
+
+              alignItems:
+                "center",
             },
           ]}
         >
           <TextInput
             placeholder="Digite sua senha"
             placeholderTextColor="#999"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={showPassword}
+            value={
+              password
+            }
+            onChangeText={
+              setPassword
+            }
+            secureTextEntry={
+              showPassword
+            }
+            autoCapitalize="none"
+            autoCorrect={
+              false
+            }
+            editable={
+              !loading
+            }
             style={{
               flex: 1,
-              textAlignVertical: "center",
+              textAlignVertical:
+                "center",
               fontSize: 16,
               paddingLeft: 10,
             }}
           />
 
           <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-            style={{ paddingHorizontal: 10 }}
+            onPress={
+              () =>
+                setShowPassword(
+                  (valorAtual) =>
+                    !valorAtual
+                )
+            }
+            style={{
+              paddingHorizontal: 10,
+            }}
+            disabled={
+              loading
+            }
           >
             <Ionicons
               name={
@@ -130,28 +350,103 @@ export default function Login() {
                   ? "eye-off-outline"
                   : "eye-outline"
               }
-              size={22}
+              size={
+                22
+              }
               color="#555"
             />
           </TouchableOpacity>
         </View>
+
+        {/* =====================================
+            LEMBRAR ACESSO
+        ===================================== */}
+
+        <TouchableOpacity
+          style={
+            style.rememberContainer
+          }
+          activeOpacity={
+            0.7
+          }
+          disabled={
+            loading
+          }
+          onPress={
+            () =>
+              setLembrarAcesso(
+                (valorAtual) =>
+                  !valorAtual
+              )
+          }
+        >
+          <View
+            style={[
+              style.checkbox,
+
+              lembrarAcesso &&
+                style.checkboxChecked,
+            ]}
+          >
+            {lembrarAcesso && (
+              <Ionicons
+                name="checkmark"
+                size={17}
+                color="#FFFFFF"
+              />
+            )}
+          </View>
+
+          <Text
+            style={
+              style.rememberText
+            }
+          >
+            Lembrar meu acesso
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={style.boxButton}>
+      {/* ENTRAR */}
+
+      <View
+        style={
+          style.boxButton
+        }
+      >
         <TouchableOpacity
-          style={style.button}
-          onPress={getLogin}
-          disabled={loading}
+          style={
+            style.button
+          }
+          onPress={
+            getLogin
+          }
+          disabled={
+            loading
+          }
+          activeOpacity={
+            0.7
+          }
         >
           {loading ? (
-            <ActivityIndicator />
+            <ActivityIndicator
+              color="#FFFFFF"
+            />
           ) : (
-            <Text style={style.buttonLogar}>Entrar</Text>
+            <Text
+              style={
+                style.buttonLogar
+              }
+            >
+              Entrar
+            </Text>
           )}
         </TouchableOpacity>
       </View>
 
-      <Text>DESENVOLVIDO POR PEDRO MARIANO</Text>
+      <Text style={style.textRodape}>
+        PontoFit • DESENVOLVIDO POR PEDRO MARIANO
+      </Text>
     </View>
   );
 }

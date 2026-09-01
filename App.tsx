@@ -24,6 +24,10 @@ import {
   Session,
 } from "@supabase/supabase-js";
 
+// ==========================================
+// TELAS
+// ==========================================
+
 import Login from "./src/pages/login";
 import Home from "./src/pages/home";
 
@@ -42,9 +46,19 @@ import Corpo from "./src/pages/corpo";
 import Historico from "./src/pages/historicoPeso";
 import Pagamento from "./src/pages/pagamento";
 
+import Splash from "./src/pages/splash";
+
+// ==========================================
+// SUPABASE
+// ==========================================
+
 import {
   supabase,
 } from "./src/lib/supabase";
+
+// ==========================================
+// ROTAS
+// ==========================================
 
 export type RootStackParamList = {
   Login: undefined;
@@ -66,11 +80,15 @@ export type RootStackParamList = {
   CadastrarAluno: undefined;
 
   Checkin: undefined;
+
   checkinPersonal: undefined;
+
   checkinsemPersonal: undefined;
 
   Corpo: undefined;
+
   Historico: undefined;
+
   Pagamento: undefined;
 };
 
@@ -79,12 +97,24 @@ const Stack =
     RootStackParamList
   >();
 
+// ==========================================
+// TIPO DE USUÁRIO
+// ==========================================
+
 type TipoUsuario =
   | "aluno"
   | "profissional"
   | null;
 
+// ==========================================
+// APP
+// ==========================================
+
 export default function App() {
+  // ========================================
+  // SESSÃO
+  // ========================================
+
   const [
     session,
     setSession,
@@ -92,6 +122,10 @@ export default function App() {
     useState<Session | null>(
       null
     );
+
+  // ========================================
+  // TIPO DO USUÁRIO
+  // ========================================
 
   const [
     tipoUsuario,
@@ -101,17 +135,51 @@ export default function App() {
       null
     );
 
+  // ========================================
+  // PRIMEIRO ACESSO
+  // ========================================
+
   const [
     precisaTrocarSenha,
     setPrecisaTrocarSenha,
   ] =
     useState(false);
 
+  // ========================================
+  // LOADING
+  // ========================================
+
   const [
     loading,
     setLoading,
   ] =
     useState(true);
+
+  // ========================================
+  // SPLASH
+  // ========================================
+
+  const [
+    splashFinalizada,
+    setSplashFinalizada,
+  ] =
+    useState(false);
+
+  // ========================================
+  // TEMPO DA SPLASH
+  // ========================================
+
+  useEffect(() => {
+    const timer =
+      setTimeout(() => {
+        setSplashFinalizada(
+          true
+        );
+      }, 1800);
+
+    return () =>
+      clearTimeout(timer);
+  }, []);
 
   // ==========================================
   // CARREGA O PERFIL DO USUÁRIO
@@ -136,7 +204,9 @@ export default function App() {
           )
           .single();
 
-      if (error) {
+      if (
+        error
+      ) {
         console.log(
           "Erro ao buscar perfil do usuário:",
           error
@@ -144,9 +214,17 @@ export default function App() {
 
         await supabase.auth.signOut();
 
-        setSession(null);
-        setTipoUsuario(null);
-        setPrecisaTrocarSenha(false);
+        setSession(
+          null
+        );
+
+        setTipoUsuario(
+          null
+        );
+
+        setPrecisaTrocarSenha(
+          false
+        );
 
         return;
       }
@@ -164,7 +242,9 @@ export default function App() {
         data.precisa_trocar_senha ===
           true
       );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.log(
         "Erro inesperado ao carregar perfil:",
         error
@@ -172,9 +252,17 @@ export default function App() {
 
       await supabase.auth.signOut();
 
-      setSession(null);
-      setTipoUsuario(null);
-      setPrecisaTrocarSenha(false);
+      setSession(
+        null
+      );
+
+      setTipoUsuario(
+        null
+      );
+
+      setPrecisaTrocarSenha(
+        false
+      );
     }
   }
 
@@ -183,11 +271,14 @@ export default function App() {
   // ==========================================
 
   useEffect(() => {
-    let ativo = true;
+    let ativo =
+      true;
 
     async function carregarSessao() {
       try {
-        setLoading(true);
+        setLoading(
+          true
+        );
 
         const {
           data: {
@@ -198,19 +289,31 @@ export default function App() {
         } =
           await supabase.auth.getSession();
 
-        if (!ativo) {
+        if (
+          !ativo
+        ) {
           return;
         }
 
-        if (error) {
+        if (
+          error
+        ) {
           console.log(
             "Erro ao carregar sessão:",
             error
           );
 
-          setSession(null);
-          setTipoUsuario(null);
-          setPrecisaTrocarSenha(false);
+          setSession(
+            null
+          );
+
+          setTipoUsuario(
+            null
+          );
+
+          setPrecisaTrocarSenha(
+            false
+          );
 
           return;
         }
@@ -234,19 +337,33 @@ export default function App() {
             false
           );
         }
-      } catch (error) {
+      } catch (
+        error
+      ) {
         console.log(
           "Erro inesperado ao carregar sessão:",
           error
         );
 
-        if (ativo) {
-          setSession(null);
-          setTipoUsuario(null);
-          setPrecisaTrocarSenha(false);
+        if (
+          ativo
+        ) {
+          setSession(
+            null
+          );
+
+          setTipoUsuario(
+            null
+          );
+
+          setPrecisaTrocarSenha(
+            false
+          );
         }
       } finally {
-        if (ativo) {
+        if (
+          ativo
+        ) {
           setLoading(
             false
           );
@@ -256,9 +373,9 @@ export default function App() {
 
     carregarSessao();
 
-    // ==========================================
+    // ========================================
     // ESCUTA LOGIN / LOGOUT / REFRESH
-    // ==========================================
+    // ========================================
 
     const {
       data: {
@@ -275,7 +392,9 @@ export default function App() {
             event
           );
 
-          if (!ativo) {
+          if (
+            !ativo
+          ) {
             return;
           }
 
@@ -294,7 +413,9 @@ export default function App() {
               novaSession.user.id
             );
 
-            if (ativo) {
+            if (
+              ativo
+            ) {
               setLoading(
                 false
               );
@@ -315,32 +436,56 @@ export default function App() {
         }
       );
 
+    // ========================================
+    // LIMPEZA
+    // ========================================
+
     return () => {
-      ativo = false;
+      ativo =
+        false;
 
       subscription.unsubscribe();
     };
   }, []);
 
   // ==========================================
+  // SPLASH SCREEN
+  // ==========================================
+
+  if (
+    !splashFinalizada
+  ) {
+    return (
+      <Splash />
+    );
+  }
+
+  // ==========================================
   // LOADING GLOBAL
   // ==========================================
 
-  if (loading) {
+  if (
+    loading
+  ) {
     return (
       <View
         style={{
           flex: 1,
+
           justifyContent:
             "center",
+
           alignItems:
             "center",
+
+          // Cor da nova identidade PontoFit
           backgroundColor:
-            "#F5F5F5",
+            "#6C63FF",
         }}
       >
         <ActivityIndicator
           size="large"
+          color="#FFFFFF"
         />
       </View>
     );
@@ -352,23 +497,30 @@ export default function App() {
 
   const perfilCarregado =
     !session ||
-    tipoUsuario !== null;
+    tipoUsuario !==
+      null;
 
-  if (!perfilCarregado) {
+  if (
+    !perfilCarregado
+  ) {
     return (
       <View
         style={{
           flex: 1,
+
           justifyContent:
             "center",
+
           alignItems:
             "center",
+
           backgroundColor:
-            "#F5F5F5",
+            "#6C63FF",
         }}
       >
         <ActivityIndicator
           size="large"
+          color="#FFFFFF"
         />
       </View>
     );
@@ -386,7 +538,8 @@ export default function App() {
 
       <Stack.Navigator
         screenOptions={{
-          headerShown: false,
+          headerShown:
+            false,
         }}
       >
         {/* ================================= */}

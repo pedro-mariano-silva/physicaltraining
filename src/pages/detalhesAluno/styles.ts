@@ -49,16 +49,17 @@ export const style = StyleSheet.create({
     marginBottom: 20,
   },
 
+  // ==========================================
+  // EDITAR ALUNO
+  // ==========================================
+
   editButton: {
     height: 46,
     borderRadius: 12,
-
     backgroundColor: "#248A3D",
-
     justifyContent: "center",
     alignItems: "center",
-
-    marginBottom: 24,
+    marginBottom: 12,
 
     shadowColor: "#000",
     shadowOffset: {
@@ -77,6 +78,46 @@ export const style = StyleSheet.create({
     fontWeight: "700",
     textAlign: "center",
   },
+
+  // ==========================================
+  // CHECK-IN PELO PROFISSIONAL
+  // ==========================================
+
+  checkinButton: {
+    minHeight: 46,
+    borderRadius: 12,
+
+    backgroundColor: "#FFFFFF",
+
+    borderWidth: 2,
+    borderColor: "#248A3D",
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    marginBottom: 24,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+
+    elevation: 1,
+  },
+
+  checkinButtonText: {
+    color: "#248A3D",
+    fontSize: 14,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+
+  // ==========================================
+  // RESUMO
+  // ==========================================
 
   summaryCard: {
     backgroundColor: "#FFFFFF",
@@ -107,6 +148,10 @@ export const style = StyleSheet.create({
     marginTop: 4,
   },
 
+  // ==========================================
+  // SEÇÕES
+  // ==========================================
+
   sectionTitle: {
     fontSize: 21,
     fontWeight: "700",
@@ -114,6 +159,10 @@ export const style = StyleSheet.create({
     marginBottom: 14,
     marginTop: 8,
   },
+
+  // ==========================================
+  // STATUS PRESENTE
+  // ==========================================
 
   presentCard: {
     backgroundColor: "#FFFFFF",
@@ -142,7 +191,20 @@ export const style = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginTop: 5,
+    lineHeight: 20,
   },
+
+  origemCheckin: {
+    marginTop: 7,
+    fontSize: 12,
+    fontWeight: "600",
+    fontStyle: "italic",
+    color: "#777",
+  },
+
+  // ==========================================
+  // STATUS AUSENTE
+  // ==========================================
 
   absentCard: {
     backgroundColor: "#FFFFFF",
@@ -166,6 +228,10 @@ export const style = StyleSheet.create({
     fontWeight: "600",
     color: "#777",
   },
+
+  // ==========================================
+  // HISTÓRICO
+  // ==========================================
 
   historyCard: {
     backgroundColor: "#FFFFFF",
@@ -203,6 +269,7 @@ export const style = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginTop: 4,
+    lineHeight: 20,
   },
 
   historyTime: {
@@ -210,6 +277,10 @@ export const style = StyleSheet.create({
     fontWeight: "600",
     color: "#444",
   },
+
+  // ==========================================
+  // REPOSIÇÃO
+  // ==========================================
 
   reposicaoStatus: {
     marginTop: 8,
@@ -261,6 +332,10 @@ export const style = StyleSheet.create({
     textAlign: "center",
   },
 
+  // ==========================================
+  // LISTA VAZIA
+  // ==========================================
+
   emptyCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 14,
@@ -270,5 +345,194 @@ export const style = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     color: "#777",
+  },
+
+  // ==========================================
+  // MODAL
+  // ==========================================
+
+  modalOverlay: {
+    flex: 1,
+
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+
+    justifyContent: "center",
+
+    paddingHorizontal: 20,
+  },
+
+  modalCard: {
+    backgroundColor: "#FFFFFF",
+
+    borderRadius: 18,
+
+    paddingHorizontal: 20,
+    paddingVertical: 22,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+
+    elevation: 8,
+  },
+
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#222",
+    textAlign: "center",
+  },
+
+  modalAluno: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#248A3D",
+
+    textAlign: "center",
+
+    marginTop: 6,
+  },
+
+  modalSubtitle: {
+    fontSize: 14,
+    color: "#666",
+
+    textAlign: "center",
+
+    lineHeight: 20,
+
+    marginTop: 8,
+    marginBottom: 18,
+  },
+
+  // ==========================================
+  // BOTÕES DE TIPO DE TREINO
+  // ==========================================
+
+  treinoButton: {
+    minHeight: 45,
+
+    borderWidth: 1,
+    borderColor: "#DADADA",
+
+    borderRadius: 10,
+
+    paddingHorizontal: 14,
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    backgroundColor: "#FFFFFF",
+
+    marginBottom: 8,
+  },
+
+  treinoButtonSelected: {
+    backgroundColor: "#248A3D",
+    borderColor: "#248A3D",
+  },
+
+  treinoButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+
+  treinoButtonTextSelected: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
+
+  // ==========================================
+  // PERGUNTA COM / SEM PERSONAL
+  // ==========================================
+
+  modalQuestion: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#333",
+
+    textAlign: "center",
+
+    marginTop: 14,
+    marginBottom: 10,
+  },
+
+  // ==========================================
+  // COM PERSONAL
+  // ==========================================
+
+  personalButton: {
+    minHeight: 46,
+
+    borderRadius: 10,
+
+    backgroundColor: "#248A3D",
+
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  personalButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+
+  // ==========================================
+  // SEM PERSONAL
+  // ==========================================
+
+  semPersonalButton: {
+    minHeight: 46,
+
+    borderRadius: 10,
+
+    backgroundColor: "#ECECEC",
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    marginTop: 10,
+  },
+
+  semPersonalButtonText: {
+    color: "#333",
+    fontSize: 14,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+
+  // ==========================================
+  // BOTÃO DESABILITADO
+  // ==========================================
+
+  modalButtonDisabled: {
+    opacity: 0.45,
+  },
+
+  // ==========================================
+  // CANCELAR
+  // ==========================================
+
+  cancelButton: {
+    minHeight: 42,
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    marginTop: 8,
+  },
+
+  cancelButtonText: {
+    color: "#777",
+    fontSize: 13,
+    fontWeight: "700",
+    textAlign: "center",
   },
 });

@@ -90,4 +90,41 @@ export const style = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
+
+  rememberContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  alignSelf: "flex-start",
+  marginTop: 14,
+  top: -65,
+  left: 170,
+},
+
+checkbox: {
+  width: 22,
+  height: 22,
+  borderWidth: 2,
+  borderColor: "#4DA953",
+  borderRadius: 5,
+  justifyContent: "center",
+  alignItems: "center",
+  backgroundColor: "#FFFFFF",
+},
+
+checkboxChecked: {
+  backgroundColor: "#4DA953",
+  borderColor: "#4DA953",
+},
+
+rememberText: {
+  marginLeft: 9,
+  fontSize: 14,
+  color: "#555",
+  fontWeight: "500",
+},
+
+textRodape:{
+    top: 20,
+    fontWeight: "bold",
+},
 });

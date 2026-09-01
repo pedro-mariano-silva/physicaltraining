@@ -1,27 +1,39 @@
 {
   "expo": {
-    "name": "diegoapp",
+    "name": "PontoFit",
     "slug": "diegoapp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/pontofit-icon.png",
     "userInterfaceStyle": "light",
-       "splash": {
+    "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#6C63FF"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/pontofit-icon.png",
+        "backgroundColor": "#6C63FF"
+      },
+      "package": "com.pedromarianosilva.pontofit"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5034e3aa-3476-4bf2-9fcc-87840ccc5759"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/5034e3aa-3476-4bf2-9fcc-87840ccc5759"
     }
   }
 }
