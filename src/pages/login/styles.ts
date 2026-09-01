@@ -58,6 +58,8 @@ export const style = StyleSheet.create({
     paddingHorizontal: 15,
     borderColor: "#68E58B",
     marginBottom: 20,
+    fontWeight: "bold",
+    color:"#000000"
   },
 
   // BOTÃO
