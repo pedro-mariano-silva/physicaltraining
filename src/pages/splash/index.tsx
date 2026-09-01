@@ -6,12 +6,21 @@ import {
 } from "react-native";
 
 import {
+  StatusBar,
+} from "expo-status-bar";
+
+import {
   style,
 } from "./styles";
 
 export default function Splash() {
   return (
     <View style={style.container}>
+      <StatusBar
+        style="light"
+        backgroundColor="#6C63FF"
+      />
+
       <View style={style.glowTop} />
 
       <View style={style.content}>
@@ -47,6 +56,7 @@ export default function Splash() {
       </View>
 
       <View style={style.wave1} />
+
       <View style={style.wave2} />
     </View>
   );

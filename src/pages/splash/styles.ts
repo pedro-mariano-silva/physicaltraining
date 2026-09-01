@@ -26,18 +26,12 @@ export const style =
         "hidden",
     },
 
-    content: {
-      alignItems:
-        "center",
-
-      justifyContent:
-        "center",
-
-      zIndex: 10,
-
-      marginTop: -30,
-    },
-
+content: {
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 10,
+  marginTop: 0,
+},
     // ==========================================
     // BRILHO SUPERIOR
     // ==========================================

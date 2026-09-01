@@ -6,8 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/pontofit-icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash-icon.png",
+       "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#6C63FF"
     },
