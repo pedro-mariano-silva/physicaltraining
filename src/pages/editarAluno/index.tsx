@@ -11,6 +11,8 @@ import {
   Alert,
   ScrollView,
   View,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 import {
@@ -467,18 +469,37 @@ export default function EditarAluno() {
   // ==========================================
 
   return (
-    <ScrollView
-      style={
-        style.container
+    <KeyboardAvoidingView
+      style={{
+        flex: 1,
+      }}
+      behavior={
+        Platform.OS === "ios"
+          ? "padding"
+          : "height"
       }
-      contentContainerStyle={
-        style.contentContainer
-      }
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={
-        false
+      keyboardVerticalOffset={
+        Platform.OS === "ios"
+          ? 20
+          : 0
       }
     >
+      <ScrollView
+        style={
+          style.container
+        }
+        contentContainerStyle={[
+          style.contentContainer,
+          {
+            paddingBottom: 140,
+          },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={
+          false
+        }
+      >
       <TouchableOpacity
         style={
           style.backButton
@@ -789,6 +810,7 @@ export default function EditarAluno() {
           )}
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

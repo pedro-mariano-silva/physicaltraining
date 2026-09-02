@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, {
+  useState,
+} from "react";
 
 import {
   View,
@@ -57,12 +59,9 @@ type TipoTreino =
   | "treino_a"
   | "treino_b"
   | "treino_unico"
-  | "treino_ab";
-
-type StatusReposicao =
-  | "nenhuma"
-  | "repor"
-  | "realizada";
+  | "treino_ab"
+  | "forca"
+  | "cardio";
 
 type OrigemCheckin =
   | "aluno"
@@ -76,10 +75,21 @@ type Checkin = {
   id: string;
   tipo: TipoCheckin;
   tipo_treino: TipoTreino | null;
-  status_reposicao: StatusReposicao;
   origem_checkin: OrigemCheckin;
   data_checkin: string;
   horario_checkin: string;
+};
+
+type StatusReposicao =
+  | "pendente"
+  | "realizada"
+  | "cancelada";
+
+type Reposicao = {
+  id: string;
+  data_reposicao: string;
+  status: StatusReposicao;
+  created_at: string;
 };
 
 // ==========================================
@@ -109,14 +119,6 @@ export default function DetalhesAluno() {
     useState(true);
 
   const [
-    atualizandoId,
-    setAtualizandoId,
-  ] =
-    useState<string | null>(
-      null
-    );
-
-  const [
     nomeAluno,
     setNomeAluno,
   ] =
@@ -127,6 +129,14 @@ export default function DetalhesAluno() {
     setCheckins,
   ] =
     useState<Checkin[]>(
+      []
+    );
+
+  const [
+    reposicoes,
+    setReposicoes,
+  ] =
+    useState<Reposicao[]>(
       []
     );
 
@@ -153,6 +163,50 @@ export default function DetalhesAluno() {
     setSalvandoCheckin,
   ] =
     useState(false);
+
+  // ==========================================
+  // REPOSIÇÃO INDEPENDENTE
+  // ==========================================
+
+  const [
+    modalReposicaoAberto,
+    setModalReposicaoAberto,
+  ] =
+    useState(false);
+
+  const [
+    dataReposicaoSelecionada,
+    setDataReposicaoSelecionada,
+  ] =
+    useState(
+      inicioDoDia(
+        new Date()
+      )
+    );
+
+  const [
+    mesCalendario,
+    setMesCalendario,
+  ] =
+    useState(
+      primeiroDiaDoMes(
+        new Date()
+      )
+    );
+
+  const [
+    salvandoReposicao,
+    setSalvandoReposicao,
+  ] =
+    useState(false);
+
+  const [
+    atualizandoReposicaoId,
+    setAtualizandoReposicaoId,
+  ] =
+    useState<string | null>(
+      null
+    );
 
   // ==========================================
   // CARREGA AO ENTRAR / VOLTAR PARA A TELA
@@ -221,7 +275,7 @@ export default function DetalhesAluno() {
       );
 
       // ========================================
-      // 2. BUSCA O HISTÓRICO
+      // 2. BUSCA O HISTÓRICO DE CHECK-INS
       // ========================================
 
       const {
@@ -234,7 +288,6 @@ export default function DetalhesAluno() {
             id,
             tipo,
             tipo_treino,
-            status_reposicao,
             origem_checkin,
             data_checkin,
             horario_checkin
@@ -278,6 +331,62 @@ export default function DetalhesAluno() {
           []
         ) as Checkin[]
       );
+
+      // ========================================
+      // 3. BUSCA AS REPOSIÇÕES
+      // ========================================
+
+      const {
+        data: reposicoesData,
+        error: reposicoesError,
+      } =
+        await supabase
+          .from("reposicoes")
+          .select(`
+            id,
+            data_reposicao,
+            status,
+            created_at
+          `)
+          .eq(
+            "aluno_id",
+            alunoId
+          )
+          .order(
+            "data_reposicao",
+            {
+              ascending: false,
+            }
+          )
+          .order(
+            "created_at",
+            {
+              ascending: false,
+            }
+          );
+
+      if (
+        reposicoesError
+      ) {
+        console.log(
+          "Erro reposições:",
+          reposicoesError
+        );
+
+        Alert.alert(
+          "Erro",
+          "Não foi possível carregar as reposições."
+        );
+
+        return;
+      }
+
+      setReposicoes(
+        (
+          reposicoesData ??
+          []
+        ) as Reposicao[]
+      );
     } catch (
       error
     ) {
@@ -295,6 +404,59 @@ export default function DetalhesAluno() {
         false
       );
     }
+  }
+
+  // ==========================================
+  // BUSCA O PROFISSIONAL LOGADO
+  // ==========================================
+
+  async function buscarProfissionalId() {
+    const {
+      data: {
+        user,
+      },
+      error: userError,
+    } =
+      await supabase.auth.getUser();
+
+    if (
+      userError ||
+      !user
+    ) {
+      console.log(
+        "Erro usuário:",
+        userError
+      );
+
+      return null;
+    }
+
+    const {
+      data: profissional,
+      error: profissionalError,
+    } =
+      await supabase
+        .from("profissionais")
+        .select("id")
+        .eq(
+          "user_id",
+          user.id
+        )
+        .single();
+
+    if (
+      profissionalError ||
+      !profissional
+    ) {
+      console.log(
+        "Erro profissional:",
+        profissionalError
+      );
+
+      return null;
+    }
+
+    return profissional.id as string;
   }
 
   // ==========================================
@@ -320,27 +482,12 @@ export default function DetalhesAluno() {
         true
       );
 
-      // ========================================
-      // IDENTIFICA USUÁRIO LOGADO
-      // ========================================
-
-      const {
-        data: {
-          user,
-        },
-        error: userError,
-      } =
-        await supabase.auth.getUser();
+      const profissionalId =
+        await buscarProfissionalId();
 
       if (
-        userError ||
-        !user
+        !profissionalId
       ) {
-        console.log(
-          "Erro usuário:",
-          userError
-        );
-
         Alert.alert(
           "Erro",
           "Não foi possível identificar o profissional."
@@ -348,44 +495,6 @@ export default function DetalhesAluno() {
 
         return;
       }
-
-      // ========================================
-      // BUSCA ID DO PROFISSIONAL
-      // ========================================
-
-      const {
-        data: profissional,
-        error: profissionalError,
-      } =
-        await supabase
-          .from("profissionais")
-          .select("id")
-          .eq(
-            "user_id",
-            user.id
-          )
-          .single();
-
-      if (
-        profissionalError ||
-        !profissional
-      ) {
-        console.log(
-          "Erro profissional:",
-          profissionalError
-        );
-
-        Alert.alert(
-          "Erro",
-          "Profissional não encontrado."
-        );
-
-        return;
-      }
-
-      // ========================================
-      // INSERE CHECK-IN
-      // ========================================
 
       const {
         error: checkinError,
@@ -397,7 +506,7 @@ export default function DetalhesAluno() {
               alunoId,
 
             profissional_id:
-              profissional.id,
+              profissionalId,
 
             tipo,
 
@@ -409,6 +518,9 @@ export default function DetalhesAluno() {
 
             origem_checkin:
               "profissional",
+
+            data_reposicao:
+              null,
           });
 
       if (
@@ -418,10 +530,6 @@ export default function DetalhesAluno() {
           "Erro check-in profissional:",
           checkinError
         );
-
-        // ======================================
-        // CHECK-IN DUPLICADO
-        // ======================================
 
         if (
           checkinError.code ===
@@ -450,10 +558,6 @@ export default function DetalhesAluno() {
 
         return;
       }
-
-      // ========================================
-      // SUCESSO
-      // ========================================
 
       setModalCheckinAberto(
         false
@@ -489,23 +593,170 @@ export default function DetalhesAluno() {
   }
 
   // ==========================================
-  // ATUALIZA REPOSIÇÃO
+  // ABRE MODAL DE REPOSIÇÃO
   // ==========================================
 
-  async function atualizarReposicao(
-    checkinId: string,
-    novoStatus:
-      StatusReposicao
+  function abrirModalReposicao() {
+    const hoje =
+      inicioDoDia(
+        new Date()
+      );
+
+    setDataReposicaoSelecionada(
+      hoje
+    );
+
+    setMesCalendario(
+      primeiroDiaDoMes(
+        hoje
+      )
+    );
+
+    setModalReposicaoAberto(
+      true
+    );
+  }
+
+  // ==========================================
+  // FECHA MODAL DE REPOSIÇÃO
+  // ==========================================
+
+  function fecharModalReposicao() {
+    if (
+      salvandoReposicao
+    ) {
+      return;
+    }
+
+    setModalReposicaoAberto(
+      false
+    );
+  }
+
+  // ==========================================
+  // CONFIRMA REPOSIÇÃO
+  // ==========================================
+
+  async function confirmarReposicao() {
+    try {
+      setSalvandoReposicao(
+        true
+      );
+
+      const profissionalId =
+        await buscarProfissionalId();
+
+      if (
+        !profissionalId
+      ) {
+        Alert.alert(
+          "Erro",
+          "Não foi possível identificar o profissional."
+        );
+
+        return;
+      }
+
+      const dataBanco =
+        formatarDataBanco(
+          dataReposicaoSelecionada
+        );
+
+      const {
+        data,
+        error,
+      } =
+        await supabase
+          .from("reposicoes")
+          .insert({
+            aluno_id:
+              alunoId,
+
+            profissional_id:
+              profissionalId,
+
+            data_reposicao:
+              dataBanco,
+
+            status:
+              "pendente",
+          })
+          .select(`
+            id,
+            data_reposicao,
+            status,
+            created_at
+          `)
+          .single();
+
+      if (
+        error
+      ) {
+        console.log(
+          "Erro ao marcar reposição:",
+          error
+        );
+
+        Alert.alert(
+          "Erro",
+          "Não foi possível marcar a reposição."
+        );
+
+        return;
+      }
+
+      setReposicoes(
+        listaAtual => [
+          data as Reposicao,
+          ...listaAtual,
+        ]
+      );
+
+      setModalReposicaoAberto(
+        false
+      );
+
+      Alert.alert(
+        "Reposição marcada",
+        `Reposição agendada para ${formatarData(
+          dataBanco
+        )}.`
+      );
+    } catch (
+      error
+    ) {
+      console.log(
+        "Erro inesperado na reposição:",
+        error
+      );
+
+      Alert.alert(
+        "Erro",
+        "Não foi possível marcar a reposição."
+      );
+    } finally {
+      setSalvandoReposicao(
+        false
+      );
+    }
+  }
+
+  // ==========================================
+  // MARCA REPOSIÇÃO COMO REALIZADA
+  // ==========================================
+
+  async function marcarReposicaoRealizada(
+    reposicaoId: string
   ) {
     if (
-      atualizandoId
+      atualizandoReposicaoId
     ) {
       return;
     }
 
     try {
-      setAtualizandoId(
-        checkinId
+      setAtualizandoReposicaoId(
+        reposicaoId
       );
 
       const {
@@ -513,33 +764,28 @@ export default function DetalhesAluno() {
         error,
       } =
         await supabase
-          .from("checkins")
+          .from("reposicoes")
           .update({
-            status_reposicao:
-              novoStatus,
+            status:
+              "realizada",
           })
           .eq(
             "id",
-            checkinId
+            reposicaoId
           )
-          .select();
-
-      console.log(
-        "Resultado update:",
-        data
-      );
-
-      console.log(
-        "Erro update:",
-        error
-      );
+          .select("id");
 
       if (
         error
       ) {
+        console.log(
+          "Erro ao concluir reposição:",
+          error
+        );
+
         Alert.alert(
           "Erro",
-          "Não foi possível atualizar o status da reposição."
+          "Não foi possível concluir a reposição."
         );
 
         return;
@@ -551,30 +797,30 @@ export default function DetalhesAluno() {
       ) {
         Alert.alert(
           "Atenção",
-          "Nenhum registro foi atualizado."
+          "Nenhuma reposição foi atualizada."
         );
 
         return;
       }
 
-      setCheckins(
-        (
-          listaAtual
-        ) =>
+      setReposicoes(
+        listaAtual =>
           listaAtual.map(
-            (
-              item
-            ) =>
+            item =>
               item.id ===
-              checkinId
+              reposicaoId
                 ? {
                     ...item,
-
-                    status_reposicao:
-                      novoStatus,
+                    status:
+                      "realizada",
                   }
                 : item
           )
+      );
+
+      Alert.alert(
+        "Reposição concluída",
+        "A reposição foi marcada como realizada."
       );
     } catch (
       error
@@ -586,10 +832,10 @@ export default function DetalhesAluno() {
 
       Alert.alert(
         "Erro",
-        "Não foi possível atualizar a reposição."
+        "Não foi possível concluir a reposição."
       );
     } finally {
-      setAtualizandoId(
+      setAtualizandoReposicaoId(
         null
       );
     }
@@ -649,23 +895,32 @@ export default function DetalhesAluno() {
       case "treino_ab":
         return "Treino A+B";
 
+      case "forca":
+        return "Treino de Força";
+
+      case "cardio":
+        return "Cardio";
+
       default:
         return "Treino não informado";
     }
   }
 
-  function textoReposicao(
+  function textoStatusReposicao(
     status:
       StatusReposicao
   ) {
     switch (
       status
     ) {
-      case "repor":
+      case "pendente":
         return "⚠ Reposição pendente";
 
       case "realizada":
         return "✓ Reposição realizada";
+
+      case "cancelada":
+        return "Reposição cancelada";
 
       default:
         return "";
@@ -678,15 +933,13 @@ export default function DetalhesAluno() {
 
   function abrirModalCheckin() {
     const hoje =
-      new Date()
-        .toISOString()
-        .split("T")[0];
+      formatarDataBanco(
+        new Date()
+      );
 
     const jaPossuiCheckin =
       checkins.some(
-        (
-          item
-        ) =>
+        item =>
           item.data_checkin ===
           hoje
       );
@@ -712,7 +965,7 @@ export default function DetalhesAluno() {
   }
 
   // ==========================================
-  // FECHA MODAL
+  // FECHA MODAL CHECK-IN
   // ==========================================
 
   function fecharModalCheckin() {
@@ -728,6 +981,146 @@ export default function DetalhesAluno() {
 
     setTipoTreinoSelecionado(
       null
+    );
+  }
+
+  // ==========================================
+  // CALENDÁRIO
+  // ==========================================
+
+  const diasSemana = [
+    "D",
+    "S",
+    "T",
+    "Q",
+    "Q",
+    "S",
+    "S",
+  ];
+
+  const nomeMes =
+    mesCalendario.toLocaleDateString(
+      "pt-BR",
+      {
+        month:
+          "long",
+
+        year:
+          "numeric",
+      }
+    );
+
+  const primeiroDia =
+    new Date(
+      mesCalendario.getFullYear(),
+      mesCalendario.getMonth(),
+      1
+    );
+
+  const quantidadeDias =
+    new Date(
+      mesCalendario.getFullYear(),
+      mesCalendario.getMonth() + 1,
+      0
+    ).getDate();
+
+  const espacosAntes =
+    primeiroDia.getDay();
+
+  const celulasCalendario:
+    Array<
+      number | null
+    > = [
+      ...Array(
+        espacosAntes
+      ).fill(
+        null
+      ),
+
+      ...Array.from(
+        {
+          length:
+            quantidadeDias,
+        },
+        (
+          _,
+          indice
+        ) =>
+          indice + 1
+      ),
+    ];
+
+  while (
+    celulasCalendario.length %
+      7 !==
+    0
+  ) {
+    celulasCalendario.push(
+      null
+    );
+  }
+
+  const hojeCalendario =
+    inicioDoDia(
+      new Date()
+    );
+
+  const podeVoltarMes =
+    primeiroDiaDoMes(
+      mesCalendario
+    ).getTime() >
+    primeiroDiaDoMes(
+      hojeCalendario
+    ).getTime();
+
+  function voltarMes() {
+    if (
+      !podeVoltarMes
+    ) {
+      return;
+    }
+
+    setMesCalendario(
+      new Date(
+        mesCalendario.getFullYear(),
+        mesCalendario.getMonth() - 1,
+        1
+      )
+    );
+  }
+
+  function avancarMes() {
+    setMesCalendario(
+      new Date(
+        mesCalendario.getFullYear(),
+        mesCalendario.getMonth() + 1,
+        1
+      )
+    );
+  }
+
+  function selecionarDia(
+    dia: number
+  ) {
+    const data =
+      inicioDoDia(
+        new Date(
+          mesCalendario.getFullYear(),
+          mesCalendario.getMonth(),
+          dia
+        )
+      );
+
+    if (
+      data.getTime() <
+      hojeCalendario.getTime()
+    ) {
+      return;
+    }
+
+    // Um único toque seleciona a data.
+    setDataReposicaoSelecionada(
+      data
     );
   }
 
@@ -764,15 +1157,13 @@ export default function DetalhesAluno() {
   // ==========================================
 
   const hoje =
-    new Date()
-      .toISOString()
-      .split("T")[0];
+    formatarDataBanco(
+      new Date()
+    );
 
   const checkinHoje =
     checkins.find(
-      (
-        item
-      ) =>
+      item =>
         item.data_checkin ===
         hoje
     );
@@ -794,9 +1185,7 @@ export default function DetalhesAluno() {
           false
         }
       >
-        {/* =====================================
-            VOLTAR
-        ===================================== */}
+        {/* VOLTAR */}
 
         <TouchableOpacity
           style={
@@ -819,9 +1208,7 @@ export default function DetalhesAluno() {
           </Text>
         </TouchableOpacity>
 
-        {/* =====================================
-            NOME DO ALUNO
-        ===================================== */}
+        {/* NOME DO ALUNO */}
 
         <Text
           style={
@@ -836,12 +1223,10 @@ export default function DetalhesAluno() {
             style.subtitle
           }
         >
-          Detalhes e histórico de presença
+          Detalhes, presença e reposições
         </Text>
 
-        {/* =====================================
-            EDITAR ALUNO
-        ===================================== */}
+        {/* EDITAR ALUNO */}
 
         <TouchableOpacity
           style={
@@ -869,9 +1254,7 @@ export default function DetalhesAluno() {
           </Text>
         </TouchableOpacity>
 
-        {/* =====================================
-            CHECK-IN PELO PROFISSIONAL
-        ===================================== */}
+        {/* CHECK-IN PELO PROFISSIONAL */}
 
         <TouchableOpacity
           style={
@@ -893,9 +1276,29 @@ export default function DetalhesAluno() {
           </Text>
         </TouchableOpacity>
 
-        {/* =====================================
-            RESUMO
-        ===================================== */}
+        {/* REPOSIÇÃO INDEPENDENTE DO CHECK-IN */}
+
+        <TouchableOpacity
+          style={
+            style.reporButton
+          }
+          activeOpacity={
+            0.7
+          }
+          onPress={
+            abrirModalReposicao
+          }
+        >
+          <Text
+            style={
+              style.reporButtonText
+            }
+          >
+            MARCAR REPOSIÇÃO
+          </Text>
+        </TouchableOpacity>
+
+        {/* RESUMO */}
 
         <View
           style={
@@ -919,9 +1322,7 @@ export default function DetalhesAluno() {
           </Text>
         </View>
 
-        {/* =====================================
-            STATUS DE HOJE
-        ===================================== */}
+        {/* STATUS DE HOJE */}
 
         <Text
           style={
@@ -978,19 +1379,6 @@ export default function DetalhesAluno() {
                 Check-in realizado pelo profissional
               </Text>
             )}
-
-            {checkinHoje.status_reposicao !==
-              "nenhuma" && (
-              <Text
-                style={
-                  style.reposicaoStatus
-                }
-              >
-                {textoReposicao(
-                  checkinHoje.status_reposicao
-                )}
-              </Text>
-            )}
           </View>
         ) : (
           <View
@@ -1008,9 +1396,108 @@ export default function DetalhesAluno() {
           </View>
         )}
 
-        {/* =====================================
-            HISTÓRICO
-        ===================================== */}
+        {/* REPOSIÇÕES */}
+
+        <Text
+          style={
+            style.sectionTitle
+          }
+        >
+          Reposições
+        </Text>
+
+        {reposicoes.length ===
+        0 ? (
+          <View
+            style={
+              style.emptyCard
+            }
+          >
+            <Text
+              style={
+                style.emptyText
+              }
+            >
+              Nenhuma reposição marcada.
+            </Text>
+          </View>
+        ) : (
+          reposicoes.map(
+            item => (
+              <View
+                key={
+                  item.id
+                }
+                style={
+                  style.historyCard
+                }
+              >
+                <View
+                  style={
+                    style.historyContent
+                  }
+                >
+                  <Text
+                    style={
+                      style.historyDate
+                    }
+                  >
+                    {formatarData(
+                      item.data_reposicao
+                    )}
+                  </Text>
+
+                  <Text
+                    style={
+                      style.reposicaoStatus
+                    }
+                  >
+                    {textoStatusReposicao(
+                      item.status
+                    )}
+                  </Text>
+
+                  {item.status ===
+                    "pendente" && (
+                    <TouchableOpacity
+                      style={
+                        style.realizadaButton
+                      }
+                      activeOpacity={
+                        0.7
+                      }
+                      disabled={
+                        atualizandoReposicaoId ===
+                        item.id
+                      }
+                      onPress={
+                        () =>
+                          marcarReposicaoRealizada(
+                            item.id
+                          )
+                      }
+                    >
+                      {atualizandoReposicaoId ===
+                      item.id ? (
+                        <ActivityIndicator />
+                      ) : (
+                        <Text
+                          style={
+                            style.realizadaButtonText
+                          }
+                        >
+                          REPOSIÇÃO REALIZADA
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            )
+          )
+        )}
+
+        {/* HISTÓRICO */}
 
         <Text
           style={
@@ -1037,9 +1524,7 @@ export default function DetalhesAluno() {
           </View>
         ) : (
           checkins.map(
-            (
-              item
-            ) => (
+            item => (
               <View
                 key={
                   item.id
@@ -1080,8 +1565,6 @@ export default function DetalhesAluno() {
                       : "Sem personal"}
                   </Text>
 
-                  {/* ORIGEM DO CHECK-IN */}
-
                   {item.origem_checkin ===
                     "profissional" && (
                     <Text
@@ -1091,97 +1574,6 @@ export default function DetalhesAluno() {
                     >
                       Check-in realizado pelo profissional
                     </Text>
-                  )}
-
-                  {/* STATUS REPOSIÇÃO */}
-
-                  {item.status_reposicao !==
-                    "nenhuma" && (
-                    <Text
-                      style={
-                        style.reposicaoStatus
-                      }
-                    >
-                      {textoReposicao(
-                        item.status_reposicao
-                      )}
-                    </Text>
-                  )}
-
-                  {/* REPOR TREINO */}
-
-                  {item.status_reposicao ===
-                    "nenhuma" && (
-                    <TouchableOpacity
-                      style={
-                        style.reporButton
-                      }
-                      activeOpacity={
-                        0.7
-                      }
-                      disabled={
-                        atualizandoId ===
-                        item.id
-                      }
-                      onPress={
-                        () =>
-                          atualizarReposicao(
-                            item.id,
-                            "repor"
-                          )
-                      }
-                    >
-                      {atualizandoId ===
-                      item.id ? (
-                        <ActivityIndicator />
-                      ) : (
-                        <Text
-                          style={
-                            style.reporButtonText
-                          }
-                        >
-                          REPOR TREINO
-                        </Text>
-                      )}
-                    </TouchableOpacity>
-                  )}
-
-                  {/* REPOSIÇÃO REALIZADA */}
-
-                  {item.status_reposicao ===
-                    "repor" && (
-                    <TouchableOpacity
-                      style={
-                        style.realizadaButton
-                      }
-                      activeOpacity={
-                        0.7
-                      }
-                      disabled={
-                        atualizandoId ===
-                        item.id
-                      }
-                      onPress={
-                        () =>
-                          atualizarReposicao(
-                            item.id,
-                            "realizada"
-                          )
-                      }
-                    >
-                      {atualizandoId ===
-                      item.id ? (
-                        <ActivityIndicator />
-                      ) : (
-                        <Text
-                          style={
-                            style.realizadaButtonText
-                          }
-                        >
-                          REPOSIÇÃO REALIZADA
-                        </Text>
-                      )}
-                    </TouchableOpacity>
                   )}
                 </View>
 
@@ -1392,8 +1784,6 @@ export default function DetalhesAluno() {
               </Text>
             </TouchableOpacity>
 
-            {/* COMO FOI REALIZADO */}
-
             <Text
               style={
                 style.modalQuestion
@@ -1505,6 +1895,490 @@ export default function DetalhesAluno() {
           </View>
         </View>
       </Modal>
+
+      {/* ==========================================
+          MODAL REPOSIÇÃO
+      ========================================== */}
+
+      <Modal
+        visible={
+          modalReposicaoAberto
+        }
+        transparent
+        animationType="fade"
+        onRequestClose={
+          fecharModalReposicao
+        }
+      >
+        <View
+          style={
+            style.modalOverlay
+          }
+        >
+          <View
+            style={
+              style.modalCard
+            }
+          >
+            <Text
+              style={
+                style.modalTitle
+              }
+            >
+              Marcar reposição
+            </Text>
+
+            <Text
+              style={
+                style.modalAluno
+              }
+            >
+              {nomeAluno}
+            </Text>
+
+            <Text
+              style={
+                style.modalSubtitle
+              }
+            >
+              Selecione o dia da reposição.
+              Um toque é suficiente.
+            </Text>
+
+            {/* CABEÇALHO DO CALENDÁRIO */}
+
+            <View
+              style={{
+                width:
+                  "100%",
+
+                flexDirection:
+                  "row",
+
+                alignItems:
+                  "center",
+
+                justifyContent:
+                  "space-between",
+
+                marginTop:
+                  8,
+
+                marginBottom:
+                  14,
+              }}
+            >
+              <TouchableOpacity
+                activeOpacity={
+                  0.7
+                }
+                disabled={
+                  !podeVoltarMes
+                }
+                onPress={
+                  voltarMes
+                }
+                style={{
+                  width:
+                    44,
+
+                  height:
+                    44,
+
+                  alignItems:
+                    "center",
+
+                  justifyContent:
+                    "center",
+
+                  opacity:
+                    podeVoltarMes
+                      ? 1
+                      : 0.25,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize:
+                      28,
+
+                    fontWeight:
+                      "700",
+                  }}
+                >
+                  ‹
+                </Text>
+              </TouchableOpacity>
+
+              <Text
+                style={{
+                  fontSize:
+                    17,
+
+                  fontWeight:
+                    "700",
+
+                  textTransform:
+                    "capitalize",
+                }}
+              >
+                {nomeMes}
+              </Text>
+
+              <TouchableOpacity
+                activeOpacity={
+                  0.7
+                }
+                onPress={
+                  avancarMes
+                }
+                style={{
+                  width:
+                    44,
+
+                  height:
+                    44,
+
+                  alignItems:
+                    "center",
+
+                  justifyContent:
+                    "center",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize:
+                      28,
+
+                    fontWeight:
+                      "700",
+                  }}
+                >
+                  ›
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* DIAS DA SEMANA */}
+
+            <View
+              style={{
+                width:
+                  "100%",
+
+                flexDirection:
+                  "row",
+              }}
+            >
+              {diasSemana.map(
+                (
+                  dia,
+                  indice
+                ) => (
+                  <View
+                    key={
+                      `${dia}-${indice}`
+                    }
+                    style={{
+                      width:
+                        "14.2857%",
+
+                      alignItems:
+                        "center",
+
+                      paddingVertical:
+                        6,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize:
+                          12,
+
+                        fontWeight:
+                          "700",
+
+                        opacity:
+                          0.55,
+                      }}
+                    >
+                      {dia}
+                    </Text>
+                  </View>
+                )
+              )}
+            </View>
+
+            {/* DIAS DO MÊS */}
+
+            <View
+              style={{
+                width:
+                  "100%",
+
+                flexDirection:
+                  "row",
+
+                flexWrap:
+                  "wrap",
+
+                marginBottom:
+                  14,
+              }}
+            >
+              {celulasCalendario.map(
+                (
+                  dia,
+                  indice
+                ) => {
+                  if (
+                    dia ===
+                    null
+                  ) {
+                    return (
+                      <View
+                        key={
+                          `vazio-${indice}`
+                        }
+                        style={{
+                          width:
+                            "14.2857%",
+
+                          height:
+                            44,
+                        }}
+                      />
+                    );
+                  }
+
+                  const dataDia =
+                    inicioDoDia(
+                      new Date(
+                        mesCalendario.getFullYear(),
+                        mesCalendario.getMonth(),
+                        dia
+                      )
+                    );
+
+                  const passado =
+                    dataDia.getTime() <
+                    hojeCalendario.getTime();
+
+                  const selecionado =
+                    formatarDataBanco(
+                      dataDia
+                    ) ===
+                    formatarDataBanco(
+                      dataReposicaoSelecionada
+                    );
+
+                  return (
+                    <View
+                      key={
+                        `dia-${dia}-${indice}`
+                      }
+                      style={{
+                        width:
+                          "14.2857%",
+
+                        height:
+                          44,
+
+                        alignItems:
+                          "center",
+
+                        justifyContent:
+                          "center",
+                      }}
+                    >
+                      <TouchableOpacity
+                        activeOpacity={
+                          0.7
+                        }
+                        disabled={
+                          passado
+                        }
+                        onPress={
+                          () =>
+                            selecionarDia(
+                              dia
+                            )
+                        }
+                        style={{
+                          width:
+                            36,
+
+                          height:
+                            36,
+
+                          borderRadius:
+                            18,
+
+                          alignItems:
+                            "center",
+
+                          justifyContent:
+                            "center",
+
+                          backgroundColor:
+                            selecionado
+                              ? "#6C63FF"
+                              : "transparent",
+
+                          opacity:
+                            passado
+                              ? 0.25
+                              : 1,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize:
+                              15,
+
+                            fontWeight:
+                              selecionado
+                                ? "700"
+                                : "500",
+
+                            color:
+                              selecionado
+                                ? "#FFFFFF"
+                                : "#222222",
+                          }}
+                        >
+                          {dia}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  );
+                }
+              )}
+            </View>
+
+            <Text
+              style={{
+                textAlign:
+                  "center",
+
+                fontSize:
+                  16,
+
+                fontWeight:
+                  "600",
+
+                marginBottom:
+                  18,
+              }}
+            >
+              Data selecionada:{" "}
+              {dataReposicaoSelecionada.toLocaleDateString(
+                "pt-BR"
+              )}
+            </Text>
+
+            <TouchableOpacity
+              style={
+                style.reporButton
+              }
+              activeOpacity={
+                0.7
+              }
+              disabled={
+                salvandoReposicao
+              }
+              onPress={
+                confirmarReposicao
+              }
+            >
+              {salvandoReposicao ? (
+                <ActivityIndicator />
+              ) : (
+                <Text
+                  style={
+                    style.reporButtonText
+                  }
+                >
+                  CONFIRMAR REPOSIÇÃO
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={
+                style.cancelButton
+              }
+              activeOpacity={
+                0.7
+              }
+              disabled={
+                salvandoReposicao
+              }
+              onPress={
+                fecharModalReposicao
+              }
+            >
+              <Text
+                style={
+                  style.cancelButtonText
+                }
+              >
+                CANCELAR
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </>
   );
+}
+
+// ==========================================
+// FUNÇÕES AUXILIARES DE DATA
+// ==========================================
+
+function inicioDoDia(
+  data: Date
+) {
+  return new Date(
+    data.getFullYear(),
+    data.getMonth(),
+    data.getDate()
+  );
+}
+
+function primeiroDiaDoMes(
+  data: Date
+) {
+  return new Date(
+    data.getFullYear(),
+    data.getMonth(),
+    1
+  );
+}
+
+function formatarDataBanco(
+  data: Date
+) {
+  const ano =
+    data.getFullYear();
+
+  const mes =
+    String(
+      data.getMonth() + 1
+    ).padStart(
+      2,
+      "0"
+    );
+
+  const dia =
+    String(
+      data.getDate()
+    ).padStart(
+      2,
+      "0"
+    );
+
+  return `${ano}-${mes}-${dia}`;
 }

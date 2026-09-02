@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import {
   View,
   Text,
@@ -7,70 +8,141 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import {
+  useNavigation,
+} from "@react-navigation/native";
 
-import { RootStackParamList } from "../../../App";
-import { supabase } from "../../lib/supabase";
-import { style } from "./styles";
+import {
+  NativeStackNavigationProp,
+} from "@react-navigation/native-stack";
 
-type NavProps = NativeStackNavigationProp<
+import {
   RootStackParamList,
-  "CadastrarAluno"
->;
+} from "../../../App";
+
+import {
+  supabase,
+} from "../../lib/supabase";
+
+import {
+  style,
+} from "./styles";
+
+type NavProps =
+  NativeStackNavigationProp<
+    RootStackParamList,
+    "CadastrarAluno"
+  >;
 
 export default function CadastrarAluno() {
-  const navigation = useNavigation<NavProps>();
+  const navigation =
+    useNavigation<NavProps>();
 
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [senha, setSenha] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [
+    nome,
+    setNome,
+  ] = useState("");
+
+  const [
+    email,
+    setEmail,
+  ] = useState("");
+
+  const [
+    telefone,
+    setTelefone,
+  ] = useState("");
+
+  const [
+    senha,
+    setSenha,
+  ] = useState("");
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
   async function cadastrarAluno() {
-    const nomeLimpo = nome.trim();
-    const emailLimpo = email.trim().toLowerCase();
-    const telefoneLimpo = telefone.trim();
+    const nomeLimpo =
+      nome.trim();
 
-    if (!nomeLimpo || !emailLimpo || !senha) {
+    const emailLimpo =
+      email
+        .trim()
+        .toLowerCase();
+
+    const telefoneLimpo =
+      telefone.trim();
+
+    if (
+      !nomeLimpo ||
+      !emailLimpo ||
+      !senha
+    ) {
       Alert.alert(
         "Atenção",
         "Preencha nome, e-mail e senha."
       );
+
       return;
     }
 
-    if (senha.length < 6) {
+    if (
+      senha.length < 6
+    ) {
       Alert.alert(
         "Atenção",
         "A senha deve possuir pelo menos 6 caracteres."
       );
+
       return;
     }
 
     try {
-      setLoading(true);
+      setLoading(
+        true
+      );
 
-      console.log("Chamando Edge Function criar-aluno...");
+      console.log(
+        "Chamando Edge Function criar-aluno..."
+      );
 
-      const { data, error } =
+      const {
+        data,
+        error,
+      } =
         await supabase.functions.invoke(
           "criar-aluno",
           {
             body: {
-              nome: nomeLimpo,
-              email: emailLimpo,
-              telefone: telefoneLimpo,
+              nome:
+                nomeLimpo,
+
+              email:
+                emailLimpo,
+
+              telefone:
+                telefoneLimpo,
+
               senha,
             },
           }
         );
 
-      console.log("RETORNO FUNCTION DATA:", data);
-      console.log("RETORNO FUNCTION ERROR:", error);
+      console.log(
+        "RETORNO FUNCTION DATA:",
+        data
+      );
+
+      console.log(
+        "RETORNO FUNCTION ERROR:",
+        error
+      );
 
       if (error) {
         let mensagemErro =
@@ -78,7 +150,9 @@ export default function CadastrarAluno() {
           "Não foi possível cadastrar o aluno.";
 
         try {
-          const context = (error as any).context;
+          const context =
+            (error as any)
+              .context;
 
           console.log(
             "EDGE FUNCTION ERROR CONTEXT:",
@@ -86,18 +160,24 @@ export default function CadastrarAluno() {
           );
 
           if (context) {
-            const resposta = await context.json();
+            const resposta =
+              await context.json();
 
             console.log(
               "RESPOSTA DA EDGE FUNCTION:",
               resposta
             );
 
-            if (resposta?.error) {
-              mensagemErro = resposta.error;
+            if (
+              resposta?.error
+            ) {
+              mensagemErro =
+                resposta.error;
             }
           }
-        } catch (erroContexto) {
+        } catch (
+          erroContexto
+        ) {
           console.log(
             "Não foi possível ler o corpo do erro:",
             erroContexto
@@ -112,7 +192,9 @@ export default function CadastrarAluno() {
         return;
       }
 
-      if (!data?.success) {
+      if (
+        !data?.success
+      ) {
         console.log(
           "FUNCTION RETORNOU SEM SUCCESS:",
           data
@@ -132,8 +214,12 @@ export default function CadastrarAluno() {
         `${nomeLimpo} foi cadastrado com sucesso.`,
         [
           {
-            text: "OK",
-            onPress: () => navigation.goBack(),
+            text:
+              "OK",
+
+            onPress:
+              () =>
+                navigation.goBack(),
           },
         ]
       );
@@ -142,7 +228,9 @@ export default function CadastrarAluno() {
       setEmail("");
       setTelefone("");
       setSenha("");
-    } catch (error) {
+    } catch (
+      error
+    ) {
       console.log(
         "ERRO INESPERADO NO CADASTRO:",
         error
@@ -153,99 +241,217 @@ export default function CadastrarAluno() {
         "Ocorreu um erro inesperado ao cadastrar o aluno."
       );
     } finally {
-      setLoading(false);
+      setLoading(
+        false
+      );
     }
   }
 
   return (
-    <ScrollView
-      style={style.container}
-      contentContainerStyle={style.contentContainer}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      style={{
+        flex: 1,
+      }}
+      behavior={
+        Platform.OS === "ios"
+          ? "padding"
+          : "height"
+      }
+      keyboardVerticalOffset={
+        Platform.OS === "ios"
+          ? 20
+          : 0
+      }
     >
-      <TouchableOpacity
-        style={style.backButton}
-        onPress={() => navigation.goBack()}
-        activeOpacity={0.7}
+      <ScrollView
+        style={
+          style.container
+        }
+        contentContainerStyle={[
+          style.contentContainer,
+          {
+            paddingBottom: 140,
+          },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={
+          false
+        }
       >
-        <Text style={style.backButtonText}>
-          ‹ Voltar
-        </Text>
-      </TouchableOpacity>
-
-      <Text style={style.title}>
-        Cadastrar aluno
-      </Text>
-
-      <Text style={style.subtitle}>
-        Crie o acesso de um novo aluno.
-      </Text>
-
-      <Text style={style.label}>
-        NOME
-      </Text>
-
-      <TextInput
-        style={style.input}
-        placeholder="Nome completo"
-        value={nome}
-        onChangeText={setNome}
-        autoCapitalize="words"
-      />
-
-      <Text style={style.label}>
-        E-MAIL
-      </Text>
-
-      <TextInput
-        style={style.input}
-        placeholder="E-mail do aluno"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-        value={email}
-        onChangeText={setEmail}
-      />
-
-      <Text style={style.label}>
-        TELEFONE
-      </Text>
-
-      <TextInput
-        style={style.input}
-        placeholder="Telefone"
-        keyboardType="phone-pad"
-        value={telefone}
-        onChangeText={setTelefone}
-      />
-
-      <Text style={style.label}>
-        SENHA INICIAL
-      </Text>
-
-      <TextInput
-        style={style.input}
-        placeholder="Senha inicial"
-        secureTextEntry
-        value={senha}
-        onChangeText={setSenha}
-        autoCapitalize="none"
-      />
-
-      <TouchableOpacity
-        style={style.button}
-        onPress={cadastrarAluno}
-        disabled={loading}
-        activeOpacity={0.7}
-      >
-        {loading ? (
-          <ActivityIndicator />
-        ) : (
-          <Text style={style.buttonText}>
-            CADASTRAR ALUNO
+        <TouchableOpacity
+          style={
+            style.backButton
+          }
+          onPress={
+            () =>
+              navigation.goBack()
+          }
+          activeOpacity={
+            0.7
+          }
+        >
+          <Text
+            style={
+              style.backButtonText
+            }
+          >
+            ‹ Voltar
           </Text>
-        )}
-      </TouchableOpacity>
-    </ScrollView>
+        </TouchableOpacity>
+
+        <Text
+          style={
+            style.title
+          }
+        >
+          Cadastrar aluno
+        </Text>
+
+        <Text
+          style={
+            style.subtitle
+          }
+        >
+          Crie o acesso de um novo aluno.
+        </Text>
+
+        <Text
+          style={
+            style.label
+          }
+        >
+          NOME
+        </Text>
+
+        <TextInput
+          style={
+            style.input
+          }
+          placeholder="Nome completo"
+          value={
+            nome
+          }
+          onChangeText={
+            setNome
+          }
+          autoCapitalize="words"
+          editable={
+            !loading
+          }
+        />
+
+        <Text
+          style={
+            style.label
+          }
+        >
+          E-MAIL
+        </Text>
+
+        <TextInput
+          style={
+            style.input
+          }
+          placeholder="E-mail do aluno"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={
+            false
+          }
+          value={
+            email
+          }
+          onChangeText={
+            setEmail
+          }
+          editable={
+            !loading
+          }
+        />
+
+        <Text
+          style={
+            style.label
+          }
+        >
+          TELEFONE
+        </Text>
+
+        <TextInput
+          style={
+            style.input
+          }
+          placeholder="Telefone"
+          keyboardType="phone-pad"
+          value={
+            telefone
+          }
+          onChangeText={
+            setTelefone
+          }
+          editable={
+            !loading
+          }
+        />
+
+        <Text
+          style={
+            style.label
+          }
+        >
+          SENHA INICIAL
+        </Text>
+
+        <TextInput
+          style={
+            style.input
+          }
+          placeholder="Senha inicial"
+          secureTextEntry
+          value={
+            senha
+          }
+          onChangeText={
+            setSenha
+          }
+          autoCapitalize="none"
+          autoCorrect={
+            false
+          }
+          editable={
+            !loading
+          }
+          returnKeyType="done"
+        />
+
+        <TouchableOpacity
+          style={
+            style.button
+          }
+          onPress={
+            cadastrarAluno
+          }
+          disabled={
+            loading
+          }
+          activeOpacity={
+            0.7
+          }
+        >
+          {loading ? (
+            <ActivityIndicator />
+          ) : (
+            <Text
+              style={
+                style.buttonText
+              }
+            >
+              CADASTRAR ALUNO
+            </Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

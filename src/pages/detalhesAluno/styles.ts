@@ -290,6 +290,7 @@ export const style = StyleSheet.create({
   },
 
   reporButton: {
+    top: -18,
     marginTop: 12,
     minHeight: 40,
     paddingHorizontal: 14,

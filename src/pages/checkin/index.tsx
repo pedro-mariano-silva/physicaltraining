@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Modal,
 } from "react-native";
 
 import { style } from "./styles";
@@ -30,10 +29,8 @@ type TipoCheckin =
   | "sem_personal";
 
 type TipoTreino =
-  | "treino_a"
-  | "treino_b"
-  | "treino_unico"
-  | "treino_ab";
+  | "forca"
+  | "cardio";
 
 export default function Checkin() {
   const navigation =
@@ -49,11 +46,6 @@ export default function Checkin() {
     null
   );
 
-  const [
-    modalVisivel,
-    setModalVisivel,
-  ] = useState(false);
-
   const [fontsLoaded] = useFonts({
     OpenSans: {
       uri: "https://fonts.gstatic.com/s/opensans/v20/mem8YaGs126MiZpBA-U1U5Ew7ytN1k7VfttU.woff2",
@@ -61,53 +53,16 @@ export default function Checkin() {
     },
   });
 
-  function selecionarTreino(
-    tipoTreino: TipoTreino
-  ) {
-    if (loading) return;
-
-    setTipoTreinoSelecionado(
-      tipoTreino
-    );
-
-    setModalVisivel(true);
-  }
-
-  function fecharModal() {
-    if (loading) return;
-
-    setModalVisivel(false);
-  }
-
-  function nomeTipoTreino() {
-    switch (
-      tipoTreinoSelecionado
-    ) {
-      case "treino_a":
-        return "TREINO A";
-
-      case "treino_b":
-        return "TREINO B";
-
-      case "treino_unico":
-        return "TREINO ÚNICO";
-
-      case "treino_ab":
-        return "TREINO A+B";
-
-      default:
-        return "";
-    }
-  }
-
   async function realizarCheckin(
     tipo: TipoCheckin
   ) {
     if (loading) return;
 
-    if (
-      !tipoTreinoSelecionado
-    ) {
+    // ========================================
+    // VERIFICA SE O TREINO FOI SELECIONADO
+    // ========================================
+
+    if (!tipoTreinoSelecionado) {
       Alert.alert(
         "Selecione o treino",
         "Informe qual treino você irá realizar hoje."
@@ -129,10 +84,7 @@ export default function Checkin() {
       } =
         await supabase.auth.getUser();
 
-      if (
-        userError ||
-        !user
-      ) {
+      if (userError || !user) {
         Alert.alert(
           "Erro",
           "Não foi possível identificar o usuário logado."
@@ -224,16 +176,20 @@ export default function Checkin() {
       );
 
       // ========================================
-      // ERRO DO CHECK-IN
+      // ERROS DO CHECK-IN
       // ========================================
 
       if (checkinError) {
+        console.log(
+          "ERRO CHECKIN:",
+          checkinError
+        );
+
+        // Check-in duplicado no mesmo dia
         if (
           checkinError.code ===
           "23505"
         ) {
-          setModalVisivel(false);
-
           Alert.alert(
             "Check-in já realizado",
             "Você já registrou seu check-in hoje.",
@@ -258,13 +214,7 @@ export default function Checkin() {
       }
 
       // ========================================
-      // 4. FECHA MODAL
-      // ========================================
-
-      setModalVisivel(false);
-
-      // ========================================
-      // 5. TELA DE SUCESSO
+      // 4. TELA DE SUCESSO
       // ========================================
 
       if (
@@ -313,7 +263,7 @@ export default function Checkin() {
         </Text>
       </View>
 
-      {/* TÍTULO */}
+      {/* TIPO DE TREINO */}
 
       <View
         style={
@@ -328,26 +278,26 @@ export default function Checkin() {
         </Text>
       </View>
 
-      {/* TIPOS DE TREINO */}
-
       <View
         style={
           style.containerTreinos
         }
       >
+        {/* TREINO DE FORÇA */}
+
         <TouchableOpacity
           style={[
             style.botaoTreino,
 
             tipoTreinoSelecionado ===
-              "treino_a" &&
+              "forca" &&
               style.botaoTreinoSelecionado,
           ]}
           activeOpacity={0.7}
           disabled={loading}
           onPress={() =>
-            selecionarTreino(
-              "treino_a"
+            setTipoTreinoSelecionado(
+              "forca"
             )
           }
         >
@@ -356,27 +306,29 @@ export default function Checkin() {
               style.textoTreino,
 
               tipoTreinoSelecionado ===
-                "treino_a" &&
+                "forca" &&
                 style.textoTreinoSelecionado,
             ]}
           >
-            TREINO A
+            TREINO DE FORÇA
           </Text>
         </TouchableOpacity>
 
+        {/* CARDIO */}
+
         <TouchableOpacity
           style={[
             style.botaoTreino,
 
             tipoTreinoSelecionado ===
-              "treino_b" &&
+              "cardio" &&
               style.botaoTreinoSelecionado,
           ]}
           activeOpacity={0.7}
           disabled={loading}
           onPress={() =>
-            selecionarTreino(
-              "treino_b"
+            setTipoTreinoSelecionado(
+              "cardio"
             )
           }
         >
@@ -385,181 +337,89 @@ export default function Checkin() {
               style.textoTreino,
 
               tipoTreinoSelecionado ===
-                "treino_b" &&
+                "cardio" &&
                 style.textoTreinoSelecionado,
             ]}
           >
-            TREINO B
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            style.botaoTreino,
-
-            tipoTreinoSelecionado ===
-              "treino_unico" &&
-              style.botaoTreinoSelecionado,
-          ]}
-          activeOpacity={0.7}
-          disabled={loading}
-          onPress={() =>
-            selecionarTreino(
-              "treino_unico"
-            )
-          }
-        >
-          <Text
-            style={[
-              style.textoTreino,
-
-              tipoTreinoSelecionado ===
-                "treino_unico" &&
-                style.textoTreinoSelecionado,
-            ]}
-          >
-            TREINO ÚNICO
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            style.botaoTreino,
-
-            tipoTreinoSelecionado ===
-              "treino_ab" &&
-              style.botaoTreinoSelecionado,
-          ]}
-          activeOpacity={0.7}
-          disabled={loading}
-          onPress={() =>
-            selecionarTreino(
-              "treino_ab"
-            )
-          }
-        >
-          <Text
-            style={[
-              style.textoTreino,
-
-              tipoTreinoSelecionado ===
-                "treino_ab" &&
-                style.textoTreinoSelecionado,
-            ]}
-          >
-            TREINO A+B
+            CARDIO
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* MODAL */}
+      {/* TIPO DO CHECK-IN */}
 
-      <Modal
-        visible={modalVisivel}
-        transparent
-        animationType="fade"
-        onRequestClose={
-          fecharModal
+      <View
+        style={
+          style.containerTitle
         }
       >
-        <View
+        <Text
+          style={style.title}
+        >
+          DESEJA REALIZAR O
+          CHECK IN:
+        </Text>
+      </View>
+
+      <View
+        style={
+          style.containerButton
+        }
+      >
+        {/* COM PERSONAL */}
+
+        <TouchableOpacity
           style={
-            style.modalOverlay
+            style.containerButtonWithPersonal
+          }
+          activeOpacity={0.4}
+          disabled={loading}
+          onPress={() =>
+            realizarCheckin(
+              "com_personal"
+            )
           }
         >
-          <View
-            style={
-              style.modalContainer
-            }
-          >
+          {loading ? (
+            <ActivityIndicator />
+          ) : (
             <Text
               style={
-                style.modalTreino
+                style.textButtonWithPersonal
               }
             >
-              {nomeTipoTreino()}
+              COM PERSONAL
             </Text>
+          )}
+        </TouchableOpacity>
 
+        {/* SEM PERSONAL */}
+
+        <TouchableOpacity
+          style={
+            style.containerButtonWithPersonal
+          }
+          activeOpacity={0.4}
+          disabled={loading}
+          onPress={() =>
+            realizarCheckin(
+              "sem_personal"
+            )
+          }
+        >
+          {loading ? (
+            <ActivityIndicator />
+          ) : (
             <Text
               style={
-                style.modalTitle
+                style.textButtonWithoutPersonal
               }
             >
-              COMO DESEJA REALIZAR
-              O CHECK-IN?
+              SEM PERSONAL
             </Text>
-
-            <TouchableOpacity
-              style={
-                style.modalButton
-              }
-              activeOpacity={0.7}
-              disabled={loading}
-              onPress={() =>
-                realizarCheckin(
-                  "com_personal"
-                )
-              }
-            >
-              {loading ? (
-                <ActivityIndicator />
-              ) : (
-                <Text
-                  style={
-                    style.modalButtonText
-                  }
-                >
-                  COM PERSONAL
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={
-                style.modalButton
-              }
-              activeOpacity={0.7}
-              disabled={loading}
-              onPress={() =>
-                realizarCheckin(
-                  "sem_personal"
-                )
-              }
-            >
-              {loading ? (
-                <ActivityIndicator />
-              ) : (
-                <Text
-                  style={
-                    style.modalButtonText
-                  }
-                >
-                  SEM PERSONAL
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={
-                style.modalCancelButton
-              }
-              activeOpacity={0.7}
-              disabled={loading}
-              onPress={
-                fecharModal
-              }
-            >
-              <Text
-                style={
-                  style.modalCancelText
-                }
-              >
-                CANCELAR
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
